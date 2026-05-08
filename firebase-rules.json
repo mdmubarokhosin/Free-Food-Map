@@ -1,0 +1,36 @@
+{
+  "rules": {
+    "spots": {
+      ".read": true,
+      ".write": true
+    },
+    "reviews": {
+      ".read": true,
+      ".write": true
+    },
+    "events": {
+      ".read": true,
+      ".write": true
+    },
+    "donations": {
+      ".read": true,
+      ".write": true
+    },
+    "reports": {
+      ".read": true,
+      ".write": true
+    },
+    "team": {
+      ".read": true,
+      ".write": true
+    },
+    "settings": {
+      ".read": true,
+      ".write": true
+    },
+    "notifications": {
+      ".read": true,
+      ".write": true
+    }
+  }
+}

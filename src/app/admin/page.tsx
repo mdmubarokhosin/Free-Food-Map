@@ -3,15 +3,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
-  verifyAdminPassword, fetchSpots, updateSpot, deleteSpot,
+  verifyAdminPassword, fetchSpots, createSpot, updateSpot, deleteSpot,
   fetchEvents, createEvent, updateEvent, deleteEvent as deleteEventFn,
-  fetchDonations, addDonation, deleteDonation as deleteDonationFn,
+  fetchDonations, addDonation, updateDonation as updateDonationFn, deleteDonation as deleteDonationFn,
   fetchTeamMembers, addTeamMember, updateTeamMember, deleteTeamMember as deleteTeamMemberFn,
-  fetchReports, updateReport, deleteReport as deleteReportFn,
+  fetchReports, submitReport, updateReport, deleteReport as deleteReportFn,
   fetchSiteSettings, updateSiteSettings,
-  fetchStats, exportSpotsToCSV,
+  fetchStats, fetchDonationStats, exportSpotsToCSV, bulkImportSpots,
 } from "@/lib/firebase-service";
-import type { Spot, FoodEvent, Donation, TeamMember, Report, SiteSettings, AppStats } from "@/types";
+import type { Spot, SpotType, FoodEvent, Donation, TeamMember, Report, SiteSettings, AppStats, DonationStats } from "@/types";
 import { SPOT_TYPE_CONFIG, SPOT_TYPE_LABELS } from "@/types";
 
 type Tab = "dashboard" | "spots" | "events" | "donations" | "team" | "reports" | "settings";
@@ -221,13 +221,31 @@ export default function AdminPage() {
         ) : (
           <>
             {activeTab === "dashboard" && (
-              <DashboardTab stats={stats} spots={spots} donations={donations} reports={reports} />
+              <DashboardTab stats={stats} spots={spots} donations={donations} reports={reports} onSeedData={async () => {
+                try {
+                  const sampleSpots: Omit<Spot, 'id'>[] = [
+                    { name: "কেন্দ্রীয় জামে মসজিদ ফ্রি ফুড ক্যাম্প", type: "daily_meal" as SpotType, address: "বায়তুল মোকাররম, ঢাকা", area: "পুরান ঢাকা", city: "ঢাকা", country: "বাংলাদেশ", lat: 23.7104, lng: 90.4074, openDays: ["saturday","sunday","monday","tuesday","wednesday","thursday","friday"], openTime: "12:00", closeTime: "14:00", notes: "প্রতিদিন দুপুরে ৫০০+ মানুষকে ফ্রি খাবার দেওয়া হয়", verified: true, active: true, createdAt: Date.now(), lastUpdated: Date.now(), startDate: null, endDate: null, autoDelete: false, viewCount: 120, directionCount: 45, positiveVotes: 12, negativeVotes: 1 },
+                    { name: "গুলশান সোসাইটি কমিউনিটি কিচেন", type: "weekly_meal" as SpotType, address: "গুলশান আব্দুল হাই রোড, ঢাকা", area: "গুলশান", city: "ঢাকা", country: "বাংলাদেশ", lat: 23.7937, lng: 90.4143, openDays: ["friday","saturday"], openTime: "13:00", closeTime: "15:00", notes: "শুক্র ও শনিবার বিকেলে ফ্রি খাবার বিতরণ", verified: true, active: true, createdAt: Date.now() - 86400000, lastUpdated: Date.now() - 86400000, startDate: null, endDate: null, autoDelete: false, viewCount: 89, directionCount: 32, positiveVotes: 8, negativeVotes: 0 },
+                    { name: "মিরপুর স্যুপ কিচেন", type: "soup_kitchen" as SpotType, address: "মিরপুর ১০, ঢাকা", area: "মিরপুর", city: "ঢাকা", country: "বাংলাদেশ", lat: 23.8023, lng: 90.3658, openDays: ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"], openTime: "18:00", closeTime: "21:00", notes: "প্রতিদিন রাতে স্যুপ ও রুটি বিতরণ করা হয়", verified: true, active: true, createdAt: Date.now() - 172800000, lastUpdated: Date.now() - 172800000, startDate: null, endDate: null, autoDelete: false, viewCount: 67, directionCount: 28, positiveVotes: 6, negativeVotes: 2 },
+                    { name: "উত্তরা গ্রোসারি ব্যাংক", type: "grocery" as SpotType, address: "উত্তরা সেক্টর ৭, ঢাকা", area: "উত্তরা", city: "ঢাকা", country: "বাংলাদেশ", lat: 23.8679, lng: 90.3928, openDays: ["saturday","wednesday"], openTime: "09:00", closeTime: "13:00", notes: "সপ্তাহে দুইদিন ফ্রি গ্রোসারি সামগ্রী বিতরণ", verified: false, active: true, createdAt: Date.now() - 259200000, lastUpdated: Date.now() - 259200000, startDate: null, endDate: null, autoDelete: false, viewCount: 43, directionCount: 15, positiveVotes: 4, negativeVotes: 1 },
+                    { name: "মোহাম্মদপুর ফ্রি মিল কেন্দ্র", type: "daily_meal" as SpotType, address: "মোহাম্মদপুর বাস স্ট্যান্ড সংলগ্ন, ঢাকা", area: "মোহাম্মদপুর", city: "ঢাকা", country: "বাংলাদেশ", lat: 23.7564, lng: 90.3563, openDays: ["friday"], openTime: "11:00", closeTime: "14:00", notes: "শুক্রবার জুমার পর ফ্রি খাবার", verified: true, active: true, createdAt: Date.now() - 345600000, lastUpdated: Date.now() - 345600000, startDate: null, endDate: null, autoDelete: false, viewCount: 95, directionCount: 38, positiveVotes: 10, negativeVotes: 0 },
+                    { name: "চট্টগ্রাম সেন্ট্রাল ফুড ব্যাংক", type: "daily_meal" as SpotType, address: "এম এ আজিজ স্টেডিয়াম সংলগ্ন, চট্টগ্রাম", area: "আগ্রাবাদ", city: "চট্টগ্রাম", country: "বাংলাদেশ", lat: 22.3569, lng: 91.8317, openDays: ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"], openTime: "12:00", closeTime: "13:30", notes: "প্রতিদিন দুপুরে ফ্রি খাবার বিতরণ", verified: true, active: true, createdAt: Date.now() - 432000000, lastUpdated: Date.now() - 432000000, startDate: null, endDate: null, autoDelete: false, viewCount: 56, directionCount: 20, positiveVotes: 7, negativeVotes: 0 },
+                  ];
+                  const count = await bulkImportSpots(sampleSpots);
+                  loadData();
+                  toast.success(`${count}টি স্যাম্পল স্পট যোগ হয়েছে!`);
+                } catch (err) {
+                  console.error("Seed error:", err);
+                  toast.error("স্যাম্পল ডেটা যোগ ব্যর্থ। Firebase রুলস চেক করুন।");
+                }
+              }} />
             )}
             {activeTab === "spots" && (
               <SpotsTab
                 spots={spots} onRefresh={refreshSpots}
                 onEdit={(s) => setEditModal({ type: "spot", data: s })}
                 onDelete={(s) => setDeleteConfirm({ type: "spot", id: s.id, name: s.name })}
+                onAdd={async (d) => { try { await createSpot(d); refreshSpots(); toast.success("নতুন স্পট যোগ হয়েছে"); } catch { toast.error("স্পট যোগ ব্যর্থ"); } }}
                 onVerify={async (id, v) => { try { await updateSpot(id, { verified: v }); refreshSpots(); toast.success(v ? "স্পট নিশ্চিত করা হয়েছে" : "নিশ্চিততা সরানো হয়েছে"); } catch { toast.error("অপারেশন ব্যর্থ"); } }}
                 onToggleActive={async (id, a) => { try { await updateSpot(id, { active: a }); refreshSpots(); toast.success(a ? "স্পট সক্রিয় করা হয়েছে" : "স্পট নিষ্ক্রিয় করা হয়েছে"); } catch { toast.error("অপারেশন ব্যর্থ"); } }}
               />
@@ -245,6 +263,7 @@ export default function AdminPage() {
                 donations={donations} onRefresh={refreshDonations}
                 onDelete={(d) => setDeleteConfirm({ type: "donation", id: d.id, name: `${d.donorName} - ৳${d.amount}` })}
                 onAdd={async (d) => { try { await addDonation(d); refreshDonations(); toast.success("অনুদান যোগ হয়েছে"); } catch { toast.error("অনুদান যোগ ব্যর্থ"); } }}
+                onUpdateStatus={async (id, s) => { try { await updateDonationFn(id, { status: s as Donation["status"] }); refreshDonations(); toast.success("অনুদান আপডেট হয়েছে"); } catch { toast.error("অনুদান আপডেট ব্যর্থ"); } }}
               />
             )}
             {activeTab === "team" && (
@@ -260,6 +279,7 @@ export default function AdminPage() {
                 reports={reports} onRefresh={refreshReports}
                 onUpdate={async (id, s) => { try { await updateReport(id, { status: s as Report["status"] }); refreshReports(); toast.success("রিপোর্ট আপডেট হয়েছে"); } catch { toast.error("রিপোর্ট আপডেট ব্যর্থ"); } }}
                 onDelete={(r) => setDeleteConfirm({ type: "report", id: r.id, name: r.spotName })}
+                onAdd={async (d) => { try { await submitReport(d); refreshReports(); toast.success("রিপোর্ট যোগ হয়েছে"); } catch { toast.error("রিপোর্ট যোগ ব্যর্থ"); } }}
               />
             )}
             {activeTab === "settings" && (
@@ -350,7 +370,7 @@ export default function AdminPage() {
 // ============================================
 // DASHBOARD TAB
 // ============================================
-function DashboardTab({ stats, spots, donations, reports }: { stats: AppStats | null; spots: Spot[]; donations: Donation[]; reports: Report[] }) {
+function DashboardTab({ stats, spots, donations, reports, onSeedData }: { stats: AppStats | null; spots: Spot[]; donations: Donation[]; reports: Report[]; onSeedData: () => void }) {
   const cards = [
     { label: "মোট স্পট", value: stats?.totalSpots || 0, icon: <i className="bi bi-geo-alt-fill text-xl"></i>, gradient: "from-blue-50 to-blue-100/50 border-blue-200/50", color: "bg-blue-500" },
     { label: "নিশ্চিত স্পট", value: stats?.verifiedSpots || 0, icon: <i className="bi bi-patch-check-fill text-xl text-green-500"></i>, gradient: "from-green-50 to-green-100/50 border-green-200/50", color: "bg-green-500" },
@@ -368,7 +388,14 @@ function DashboardTab({ stats, spots, donations, reports }: { stats: AppStats | 
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-bold text-foreground">ড্যাশবোর্ড</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-foreground">ড্যাশবোর্ড</h2>
+        {spots.length === 0 && (
+          <button onClick={onSeedData} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold hover:shadow-md transition-all">
+            <i className="bi bi-magic"></i> স্যাম্পল ডেটা যোগ করুন
+          </button>
+        )}
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {cards.map((c) => (
           <div key={c.label} className={`admin-card bg-gradient-to-br ${c.gradient} border rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200`}>
@@ -430,14 +457,31 @@ function DashboardTab({ stats, spots, donations, reports }: { stats: AppStats | 
 // ============================================
 // SPOTS TAB
 // ============================================
-function SpotsTab({ spots, onRefresh, onEdit, onDelete, onVerify, onToggleActive }: {
+function SpotsTab({ spots, onRefresh, onEdit, onDelete, onAdd, onVerify, onToggleActive }: {
   spots: Spot[]; onRefresh: () => void;
   onEdit: (s: Spot) => void; onDelete: (s: Spot) => void;
+  onAdd: (d: any) => void;
   onVerify: (id: string, v: boolean) => void; onToggleActive: (id: string, a: boolean) => void;
 }) {
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterVerified, setFilterVerified] = useState("all");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addForm, setAddForm] = useState({ name: "", type: "daily_meal" as SpotType, address: "", area: "", city: "ঢাকা", lat: "23.7596", lng: "90.379", notes: "", openTime: "00:00", closeTime: "23:59" });
+
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onAdd({
+      name: addForm.name, type: addForm.type, address: addForm.address,
+      area: addForm.area, city: addForm.city, country: "বাংলাদেশ",
+      lat: parseFloat(addForm.lat), lng: parseFloat(addForm.lng),
+      openDays: ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"],
+      openTime: addForm.openTime, closeTime: addForm.closeTime,
+      notes: addForm.notes || null,
+    });
+    setShowAddForm(false);
+    setAddForm({ name: "", type: "daily_meal", address: "", area: "", city: "ঢাকা", lat: "23.7596", lng: "90.379", notes: "", openTime: "00:00", closeTime: "23:59" });
+  };
 
   const filtered = spots.filter((s) => {
     if (search && !s.name.toLowerCase().includes(search.toLowerCase()) && !s.area.toLowerCase().includes(search.toLowerCase())) return false;
@@ -451,10 +495,49 @@ function SpotsTab({ spots, onRefresh, onEdit, onDelete, onVerify, onToggleActive
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-foreground">স্পট ম্যানেজমেন্ট</h2>
-        <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors">
-          <i className="bi bi-arrow-clockwise text-xs"></i> রিফ্রেশ
-        </button>
+        <div className="flex gap-2">
+          <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors">
+            <i className="bi bi-arrow-clockwise text-xs"></i> রিফ্রেশ
+          </button>
+          <button onClick={() => setShowAddForm(!showAddForm)} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all">
+            {showAddForm ? "বন্ধ করুন" : "+ নতুন স্পট"}
+          </button>
+        </div>
       </div>
+
+      {/* Add Spot Form */}
+      {showAddForm && (
+        <form onSubmit={handleAddSubmit} className="bg-card rounded-xl p-5 border border-border space-y-3 animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input placeholder="স্থানের নাম *" value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} required
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <select value={addForm.type} onChange={(e) => setAddForm({ ...addForm, type: e.target.value as SpotType })}
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+              {Object.entries(SPOT_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
+            </select>
+            <input placeholder="এলাকা / মহল্লা *" value={addForm.area} onChange={(e) => setAddForm({ ...addForm, area: e.target.value })} required
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input placeholder="শহর" value={addForm.city} onChange={(e) => setAddForm({ ...addForm, city: e.target.value })}
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input placeholder="ঠিকানা" value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })}
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input placeholder="নোটস" value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input placeholder="অক্ষাংশ (lat)" value={addForm.lat} onChange={(e) => setAddForm({ ...addForm, lat: e.target.value })} type="number" step="any"
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input placeholder="দ্রাঘিমাংশ (lng)" value={addForm.lng} onChange={(e) => setAddForm({ ...addForm, lng: e.target.value })} type="number" step="any"
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input placeholder="খোলার সময়" value={addForm.openTime} onChange={(e) => setAddForm({ ...addForm, openTime: e.target.value })} type="time"
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+            <input placeholder="বন্ধের সময়" value={addForm.closeTime} onChange={(e) => setAddForm({ ...addForm, closeTime: e.target.value })} type="time"
+              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors">বাতিল</button>
+            <button type="submit" className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all">স্পট যোগ করুন</button>
+          </div>
+        </form>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2">
@@ -639,9 +722,10 @@ function EventsTab({ events, onRefresh, onEdit, onDelete, onAdd }: {
 // ============================================
 // DONATIONS TAB
 // ============================================
-function DonationsTab({ donations, onRefresh, onDelete, onAdd }: {
+function DonationsTab({ donations, onRefresh, onDelete, onAdd, onUpdateStatus }: {
   donations: Donation[]; onRefresh: () => void;
   onDelete: (d: Donation) => void; onAdd: (d: any) => void;
+  onUpdateStatus: (id: string, status: string) => void;
 }) {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ donorName: "", amount: "", method: "bKash", message: "", status: "confirmed" as string });
@@ -701,7 +785,12 @@ function DonationsTab({ donations, onRefresh, onDelete, onAdd }: {
               {d.message && <p className="text-xs text-muted-foreground mt-1">{d.message}</p>}
               <p className="text-[10px] text-muted-foreground mt-1">{new Date(d.createdAt).toLocaleDateString("bn-BD")}</p>
             </div>
-            <button onClick={() => onDelete(d)} className="p-1.5 rounded-lg hover:bg-destructive/10 shrink-0"><i className="bi bi-trash3 text-xs"></i></button>
+            <div className="flex items-center gap-1 shrink-0">
+              {d.status === "pending" && (
+                <button onClick={() => onUpdateStatus(d.id, "confirmed")} className="p-1.5 rounded-lg hover:bg-green-50" title="নিশ্চিত করুন"><i className="bi bi-check-circle text-xs text-green-500"></i></button>
+              )}
+              <button onClick={() => onDelete(d)} className="p-1.5 rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-xs"></i></button>
+            </div>
           </div>
         ))}
         {donations.length === 0 && <p className="text-center text-muted-foreground text-sm py-8">কোন অনুদান নেই</p>}
@@ -790,20 +879,59 @@ function TeamTab({ team, onRefresh, onEdit, onDelete, onAdd }: {
 // ============================================
 // REPORTS TAB
 // ============================================
-function ReportsTab({ reports, onRefresh, onUpdate, onDelete }: {
+function ReportsTab({ reports, onRefresh, onUpdate, onDelete, onAdd }: {
   reports: Report[]; onRefresh: () => void;
   onUpdate: (id: string, status: string) => void;
   onDelete: (r: Report) => void;
+  onAdd: (d: any) => void;
 }) {
-  const statusLabel = (s: string) => s === "pending" ? "অপেক্ষমান" : s === "resolved" ? "সমাধান" : "বাতিল";
-  const statusColor = (s: string) => s === "pending" ? "bg-amber-500/10 text-amber-600" : s === "resolved" ? "bg-green-500/10 text-green-600" : "bg-gray-500/10 text-gray-500";
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ spotId: "", spotName: "", type: "incorrect_info", description: "", reporterName: "", reporterContact: "" });
+
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onAdd({ spotId: form.spotId, spotName: form.spotName, type: form.type, description: form.description, reporterName: form.reporterName || undefined, reporterContact: form.reporterContact || undefined });
+    setShowForm(false);
+    setForm({ spotId: "", spotName: "", type: "incorrect_info", description: "", reporterName: "", reporterContact: "" });
+  };
+
+  const statusLabel = (s: string) => s === "pending" ? "অপেক্ষমান" : s === "reviewing" ? "পর্যালোচনা" : s === "resolved" ? "সমাধান" : "বাতিল";
+  const statusColor = (s: string) => s === "pending" ? "bg-amber-500/10 text-amber-600" : s === "reviewing" ? "bg-blue-500/10 text-blue-600" : s === "resolved" ? "bg-green-500/10 text-green-600" : "bg-gray-500/10 text-gray-500";
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-foreground">রিপোর্ট</h2>
-        <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium"><i className="bi bi-arrow-clockwise text-xs"></i> রিফ্রেশ</button>
+        <div className="flex gap-2">
+          <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium"><i className="bi bi-arrow-clockwise text-xs"></i> রিফ্রেশ</button>
+          <button onClick={() => setShowForm(!showForm)} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all">
+            {showForm ? "বন্ধ করুন" : "+ নতুন রিপোর্ট"}
+          </button>
+        </div>
       </div>
+
+      {showForm && (
+        <form onSubmit={handleAddSubmit} className="bg-card rounded-xl p-5 border border-border space-y-3 animate-fade-in">
+          <input placeholder="স্পটের নাম *" value={form.spotName} onChange={(e) => setForm({ ...form, spotName: e.target.value })} required
+            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <input placeholder="স্পট ID" value={form.spotId} onChange={(e) => setForm({ ...form, spotId: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+            <option value="incorrect_info">ভুল তথ্য</option>
+            <option value="closed">স্থান বন্ধ</option>
+            <option value="inappropriate">অনুপযুক্ত বিষয়বস্তু</option>
+            <option value="duplicate">অনুলিপি</option>
+            <option value="other">অন্যান্য</option>
+          </select>
+          <textarea placeholder="বিবরণ *" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} required
+            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <input placeholder="রিপোর্টারের নাম" value={form.reporterName} onChange={(e) => setForm({ ...form, reporterName: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all">রিপোর্ট যোগ করুন</button>
+        </form>
+      )}
+
       <div className="space-y-2">
         {reports.map((r) => (
           <div key={r.id} className="bg-card rounded-xl p-4 border border-border flex items-center justify-between gap-3">
@@ -818,8 +946,15 @@ function ReportsTab({ reports, onRefresh, onUpdate, onDelete }: {
             <div className="flex items-center gap-1 shrink-0">
               {r.status === "pending" && (
                 <>
-                  <button onClick={() => onUpdate(r.id, "resolved")} className="p-1.5 rounded-lg hover:bg-green-50"><i className="bi bi-check-circle text-xs text-green-500"></i></button>
-                  <button onClick={() => onUpdate(r.id, "dismissed")} className="p-1.5 rounded-lg hover:bg-gray-100"><i className="bi bi-x-circle text-xs text-gray-400"></i></button>
+                  <button onClick={() => onUpdate(r.id, "reviewing")} className="p-1.5 rounded-lg hover:bg-blue-50" title="পর্যালোচনা"><i className="bi bi-eye text-xs text-blue-500"></i></button>
+                  <button onClick={() => onUpdate(r.id, "resolved")} className="p-1.5 rounded-lg hover:bg-green-50" title="সমাধান"><i className="bi bi-check-circle text-xs text-green-500"></i></button>
+                  <button onClick={() => onUpdate(r.id, "dismissed")} className="p-1.5 rounded-lg hover:bg-gray-100" title="বাতিল"><i className="bi bi-x-circle text-xs text-gray-400"></i></button>
+                </>
+              )}
+              {r.status === "reviewing" && (
+                <>
+                  <button onClick={() => onUpdate(r.id, "resolved")} className="p-1.5 rounded-lg hover:bg-green-50" title="সমাধান"><i className="bi bi-check-circle text-xs text-green-500"></i></button>
+                  <button onClick={() => onUpdate(r.id, "dismissed")} className="p-1.5 rounded-lg hover:bg-gray-100" title="বাতিল"><i className="bi bi-x-circle text-xs text-gray-400"></i></button>
                 </>
               )}
               <button onClick={() => onDelete(r)} className="p-1.5 rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-xs"></i></button>
