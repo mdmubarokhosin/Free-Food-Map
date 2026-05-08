@@ -122,11 +122,11 @@ export default function HomePage() {
           {/* Logo */}
           <div className="flex items-center gap-2 shrink-0">
             <a href="/" className="flex items-center gap-2 hover:scale-105 transition-transform">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-200/50">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-600 via-teal-500 to-teal-700 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-teal-200/50">
                 <i className="bi bi-cup-hot text-base"></i>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-foreground leading-tight">
+                <h1 className="text-lg font-bold text-[#111827] leading-tight">
                   ফ্রি ফুড ম্যাপ
                 </h1>
                 <p className="text-[10px] text-muted-foreground leading-tight">
@@ -145,7 +145,7 @@ export default function HomePage() {
                 placeholder="এলাকা বা স্পট খুঁজুন..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 border-0 shadow-lg text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-teal-500 border-0 shadow-lg text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-teal-400 transition-all"
               />
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function HomePage() {
           {/* Right section */}
           <div className="flex items-center gap-2 shrink-0">
             {/* Live Badge */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-semibold">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold border border-teal-200/60">
               <span className="live-dot"></span>
               <span className="hidden sm:inline">সরাসরি</span>
             </div>
@@ -161,7 +161,7 @@ export default function HomePage() {
             {/* Admin link */}
             <a
               href="/admin"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200/60 hover:bg-teal-100 transition-colors"
               title="এডমিন"
             >
               <i className="bi bi-gear-fill text-sm"></i>
@@ -187,8 +187,8 @@ export default function HomePage() {
 
         {/* Spot Counter Overlay */}
         <div className="absolute top-3 left-3 z-[1000]">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-semibold shadow-lg shadow-orange-200">
-            <i className="bi bi-geo-alt-fill text-sm"></i>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 text-sm font-semibold shadow-md border border-teal-200/60">
+            <i className="bi bi-geo-alt-fill text-sm text-teal-600"></i>
             <span>সর্বমোট: {toBn(activeCount)} | নতুন: {toBn(todayCount)} | নিশ্চিত: {toBn(verifiedCount)}</span>
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function HomePage() {
         {/* FAB Button */}
         <button
           onClick={() => setShowAddModal(true)}
-          className="absolute bottom-4 right-4 z-[1000] w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xl flex items-center justify-center hover:shadow-2xl hover:shadow-orange-300 transition-all hover:scale-105 active:scale-95 no-print sm:bottom-6 sm:right-6 sm:w-16 sm:h-16 ring-4 ring-orange-200/50 animate-pulse-glow"
+          className="absolute bottom-4 right-4 z-[1000] w-14 h-14 rounded-full bg-gradient-to-r from-teal-500 to-teal-600 text-white shadow-xl flex items-center justify-center hover:shadow-2xl hover:shadow-teal-300/50 transition-all hover:scale-105 active:scale-95 no-print sm:bottom-6 sm:right-6 sm:w-16 sm:h-16 ring-4 ring-teal-200/50 animate-pulse-glow"
           title="নতুন স্পট যোগ করুন"
         >
           <i className="bi bi-plus-lg text-lg sm:text-xl"></i>
@@ -234,20 +234,20 @@ export default function HomePage() {
       />
 
       {/* Footer Bar */}
-      <footer className="glass relative z-[999] py-2 px-4 no-print backdrop-blur-md bg-white/30 border-t border-white/20">
+      <footer className="relative z-[999] py-2.5 px-4 no-print bg-[#111827] border-t border-[#1F2937]">
         <div className="flex items-center justify-between flex-wrap gap-1.5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <i className="bi bi-cup-hot text-accent text-xs"></i>
+          <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
+            <i className="bi bi-cup-hot text-teal-400 text-xs"></i>
             <span>ফ্রি ফুড ম্যাপ &copy; {new Date().getFullYear()}</span>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
-            <a href="/dev-info" className="hover:text-emerald-600 transition-colors">আমাদের সম্পর্কে</a>
-            <span className="text-border">|</span>
-            <a href="/dev-info" className="hover:text-emerald-600 transition-colors">কিভাবে কাজ করে</a>
-            <span className="text-border">|</span>
-            <a href="/dev-info" className="hover:text-emerald-600 transition-colors">যোগাযোগ</a>
-            <span className="text-border">|</span>
-            <a href="/admin" className="hover:text-orange-500 transition-colors">এডমিন লগইন</a>
+          <div className="flex items-center gap-2 text-[11px] text-[#9CA3AF] flex-wrap">
+            <a href="/dev-info" className="hover:text-teal-300 hover:underline transition-colors">আমাদের সম্পর্কে</a>
+            <span className="text-[#374151]">|</span>
+            <a href="/dev-info" className="hover:text-teal-300 hover:underline transition-colors">কিভাবে কাজ করে</a>
+            <span className="text-[#374151]">|</span>
+            <a href="/dev-info" className="hover:text-teal-300 hover:underline transition-colors">যোগাযোগ</a>
+            <span className="text-[#374151]">|</span>
+            <a href="/admin" className="hover:text-teal-300 hover:underline transition-colors">এডমিন লগইন</a>
           </div>
         </div>
       </footer>

@@ -123,7 +123,7 @@ export default function BottomSheet({
       onTouchMove={handleTouchMove}
     >
       {/* Decorative top gradient border */}
-      <div className="h-1 w-full bg-gradient-to-r from-orange-500 via-amber-400 to-emerald-500 rounded-t-2xl" />
+      <div className="h-1 w-full bg-gradient-to-r from-teal-500 via-teal-400 to-teal-300 rounded-t-2xl" />
 
       {/* Handle */}
       <div className="flex justify-center pt-1.5 pb-0.5 cursor-pointer" onClick={onToggleExpand}>
@@ -131,7 +131,7 @@ export default function BottomSheet({
       </div>
 
       {/* Header - Beautiful gradient */}
-      <div className="mx-3 mb-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 shadow-lg shadow-emerald-200/50 dark:shadow-emerald-900/30">
+      <div className="mx-3 mb-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-teal-600 via-teal-700 to-teal-800 shadow-lg shadow-teal-200/50 dark:shadow-teal-900/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Spots Icon */}
@@ -154,7 +154,7 @@ export default function BottomSheet({
             {/* Add Spot Button */}
             <button
               onClick={onAddClick}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-emerald-700 text-xs font-bold hover:bg-white/90 active:scale-95 transition-all shadow-md"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-teal-700 text-xs font-bold hover:bg-white/90 active:scale-95 transition-all shadow-md"
             >
               <i className="bi bi-plus-lg text-sm"></i>
               <span className="hidden sm:inline">নতুন স্পট</span>
@@ -208,7 +208,7 @@ export default function BottomSheet({
             <p className="text-xs text-muted-foreground mb-4">আপনি চাইলে প্রথম ফ্রি ফুড স্পটটি যুক্ত করতে পারেন।</p>
             <button
               onClick={onAddClick}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold hover:shadow-lg transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 text-white text-sm font-bold hover:shadow-lg transition-all active:scale-95"
             >
               <i className="bi bi-plus-lg"></i> স্পট যোগ করুন
             </button>
@@ -221,7 +221,7 @@ export default function BottomSheet({
             <p className="text-sm font-bold text-foreground mb-1">এই ক্যাটাগরিতে কোন স্পট নেই</p>
             <button
               onClick={() => setActiveFilter("all")}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-white text-sm font-bold hover:shadow-lg transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 text-white text-sm font-bold hover:shadow-lg transition-all active:scale-95"
             >
               <i className="bi bi-grid-3x3-gap-fill"></i> সব স্পট দেখুন
             </button>
@@ -321,7 +321,7 @@ function SpotCard({
       className={`
         group relative p-3.5 rounded-2xl cursor-pointer transition-all duration-300
         ${isLatest
-          ? "bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 text-white shadow-lg shadow-emerald-300/40 dark:shadow-emerald-900/50 ring-1 ring-emerald-400/50"
+          ? "bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 text-white shadow-lg shadow-teal-300/40 dark:shadow-teal-900/50 ring-1 ring-teal-400/50"
           : isNew
           ? "new-spot-card bg-card hover:bg-secondary/50 shadow-sm hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-orange-200/50 dark:hover:ring-orange-800/30"
           : "bg-card hover:bg-secondary/50 shadow-sm hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-border"
@@ -477,7 +477,7 @@ function SpotCard({
               window.open(`https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`, "_blank");
             }}
             title="ম্যাপে রাস্তা দেখুন"
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700 transition-all active:scale-95 shadow-sm"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-teal-600 text-white hover:bg-teal-700 transition-all active:scale-95 shadow-sm"
           >
             <i className="bi bi-cursor-fill text-[9px]"></i> ডিরেকশন
           </button>
