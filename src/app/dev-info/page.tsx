@@ -24,7 +24,7 @@ export default function DevInfoPage() {
     <div className="min-h-screen bg-background">
       <div className="bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 text-white py-12 px-4 text-center">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-orange-500/30">
-          🍽️
+          <i className="bi bi-cup-hot-fill text-3xl"></i>
         </div>
         <h1 className="text-3xl font-bold mb-2">ফ্রি ফুড ম্যাপ</h1>
         <p className="text-white/80 max-w-md mx-auto">
@@ -114,7 +114,7 @@ export default function DevInfoPage() {
         {/* CTA */}
         <div className="text-center py-4">
           <a href="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold hover:shadow-lg hover:shadow-orange-200 transition-all hover:-translate-y-0.5">
-            🍽️ নতুন স্পট যোগ করুন
+            <i className="bi bi-cup-hot text-lg"></i> নতুন স্পট যোগ করুন
           </a>
         </div>
 

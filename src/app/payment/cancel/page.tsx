@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { XCircle, ArrowLeft, RefreshCw } from 'lucide-react';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ function PaymentCancelContent() {
         <Card className="w-full max-w-md border-0 shadow-xl">
           <CardHeader className="text-center">
             <div className="mx-auto w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
-              <XCircle className="h-10 w-10 text-red-600" />
+              <i className="bi bi-x-circle text-4xl text-red-600"></i>
             </div>
             <CardTitle className="text-2xl text-red-600">পেমেন্ট বাতিল</CardTitle>
             <CardDescription>
@@ -38,14 +38,14 @@ function PaymentCancelContent() {
             
             <Button asChild className="w-full bg-green-600 hover:bg-green-700">
               <Link href="/donate">
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <i className="bi bi-arrow-clockwise text-base mr-2"></i>
                 আবার চেষ্টা করুন
               </Link>
             </Button>
             
             <Button variant="outline" asChild className="w-full">
               <Link href="/">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <i className="bi bi-arrow-left text-base mr-2"></i>
                 হোমপেজে ফিরে যান
               </Link>
             </Button>

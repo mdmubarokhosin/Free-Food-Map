@@ -5,27 +5,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  ArrowLeft,
-  Activity,
-  Clock,
-  Server,
-  Shield,
-  AlertTriangle,
-  CheckCircle2,
-  Loader2,
-  RefreshCw,
-  Signal,
-  Globe,
-  Database,
-  Key,
-  Layers,
-  HardDrive,
-  Zap,
-  Bell,
-  BarChart3,
-  TrendingUp,
-} from 'lucide-react';
+
 import { ComprehensiveStatus, ServiceStatus as ServiceStatusType } from '@/types';
 import { getSystemStatus } from '@/lib/services';
 import Navbar from '@/components/app/Navbar';
@@ -49,16 +29,16 @@ import {
 } from 'recharts';
 
 // Service icon mapping
-const serviceIcons: Record<string, React.ElementType> = {
-  Database: Database,
-  'API Server': Server,
-  'Auth Service': Key,
-  'Map Service': Globe,
-  Storage: HardDrive,
-  CDN: Zap,
-  Cache: Layers,
-  'Background Jobs': Activity,
-  Notifications: Bell,
+const serviceIcons: Record<string, string> = {
+  Database: 'bi bi-database',
+  'API Server': 'bi bi-hdd-server',
+  'Auth Service': 'bi bi-key',
+  'Map Service': 'bi bi-globe',
+  Storage: 'bi bi-hdd',
+  CDN: 'bi bi-lightning-charge',
+  Cache: 'bi bi-layers',
+  'Background Jobs': 'bi bi-activity',
+  Notifications: 'bi bi-bell',
 };
 
 // Bengali number converter
@@ -125,7 +105,7 @@ export default function StatusPage() {
     try {
       const data = await getSystemStatus();
       if (data.success) {
-        setStatus(data.status);
+        setStatus(data.status || null);
       }
     } catch (error) {
       console.error('Error fetching status:', error);
@@ -206,7 +186,7 @@ export default function StatusPage() {
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/">
-              <ArrowLeft className="h-4 w-4 mr-1" />
+              <i className="bi bi-arrow-left text-base mr-1"></i>
               হোমে ফিরে যান
             </Link>
           </Button>
@@ -215,7 +195,7 @@ export default function StatusPage() {
         {loading ? (
           <div className="flex items-center justify-center h-[400px]">
             <div className="text-center">
-              <Loader2 className="h-10 w-10 animate-spin text-green-600 mx-auto mb-3" />
+              <i className="bi bi-arrow-repeat text-4xl animate-spin text-green-600 mx-auto mb-3"></i>
               <p className="text-muted-foreground">স্ট্যাটাস লোড হচ্ছে...</p>
             </div>
           </div>
@@ -227,7 +207,7 @@ export default function StatusPage() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                      <Activity className="h-6 w-6 text-green-600" />
+                      <i className="bi bi-activity text-2xl text-green-600"></i>
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -237,7 +217,7 @@ export default function StatusPage() {
                         </span>
                       </div>
                       <div className="flex items-center gap-1 text-muted-foreground mt-1">
-                        <Clock className="h-4 w-4" />
+                        <i className="bi bi-clock text-base"></i>
                         <span className="text-sm">
                           সর্বশেষ চেক: {formatTimeAgo(status.lastCheck)}
                         </span>
@@ -250,7 +230,7 @@ export default function StatusPage() {
                     onClick={() => fetchStatus(true)}
                     disabled={refreshing}
                   >
-                    <RefreshCw className={`h-4 w-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
+                    <i className={`bi bi-arrow-clockwise text-base mr-1 ${refreshing ? 'animate-spin' : ''}`}></i>
                     {refreshing ? 'রিফ্রেশ হচ্ছে...' : 'রিফ্রেশ'}
                   </Button>
                 </div>
@@ -268,7 +248,7 @@ export default function StatusPage() {
                         {toBengaliNumber(status.uptime.toFixed(2))}%
                       </p>
                     </div>
-                    <TrendingUp className="h-10 w-10 text-green-400" />
+                    <i className="bi bi-graph-up-arrow text-4xl text-green-400"></i>
                   </div>
                 </CardContent>
               </Card>
@@ -282,7 +262,7 @@ export default function StatusPage() {
                         {toBengaliNumber(status.avgResponseTime)}মি.সে.
                       </p>
                     </div>
-                    <Signal className="h-10 w-10 text-yellow-400" />
+                    <i className="bi bi-signal text-4xl text-yellow-400"></i>
                   </div>
                 </CardContent>
               </Card>
@@ -296,7 +276,7 @@ export default function StatusPage() {
                         {toBengaliNumber(status.totalChecks.toLocaleString())}
                       </p>
                     </div>
-                    <BarChart3 className="h-10 w-10 text-muted-foreground/40" />
+                    <i className="bi bi-bar-chart text-4xl text-muted-foreground/40"></i>
                   </div>
                 </CardContent>
               </Card>
@@ -306,7 +286,7 @@ export default function StatusPage() {
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
-                  <Server className="h-5 w-5 text-muted-foreground" />
+                  <i className="bi bi-hdd-server text-xl text-muted-foreground"></i>
                   <CardTitle className="text-lg">
                     সার্ভিস স্ট্যাটাস ({toBengaliNumber(operationalCount)}/{toBengaliNumber(totalServices)})
                   </CardTitle>
@@ -315,14 +295,14 @@ export default function StatusPage() {
               <CardContent>
                 <div className="space-y-3">
                   {status.services.map((service: ServiceStatusType) => {
-                    const Icon = serviceIcons[service.name] || Server;
+                    const iconClass = serviceIcons[service.name] || 'bi bi-hdd-server';
                     return (
                       <div
                         key={service.name}
                         className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors gap-2"
                       >
                         <div className="flex items-center gap-3">
-                          <Icon className="h-5 w-5 text-muted-foreground" />
+                          <i className={`${iconClass} text-xl text-muted-foreground`}></i>
                           <span className="font-medium">{serviceNameBn[service.name] || service.name}</span>
                         </div>
                         <div className="flex items-center gap-4 justify-between sm:justify-end">
@@ -439,7 +419,7 @@ export default function StatusPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <i className="bi bi-shield-check text-xl text-muted-foreground"></i>
                     <CardTitle className="text-lg">এসএসএল সার্টিফিকেট</CardTitle>
                   </div>
                 </CardHeader>
@@ -448,7 +428,7 @@ export default function StatusPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">সার্টিফিকেট স্ট্যাটাস</span>
                       <Badge className="bg-green-50 text-green-700 border-green-200">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
+                        <i className="bi bi-check-circle text-xs mr-1"></i>
                         বৈধ
                       </Badge>
                     </div>
@@ -480,14 +460,14 @@ export default function StatusPage() {
               <Card>
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+                    <i className="bi bi-exclamation-triangle text-xl text-muted-foreground"></i>
                     <CardTitle className="text-lg">ঘটনা ইতিহাস</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
                   {status.incidents.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <CheckCircle2 className="h-12 w-12 text-green-500 mb-3" />
+                      <i className="bi bi-check-circle text-5xl text-green-500 mb-3"></i>
                       <p className="font-medium text-green-600">
                         সব সিস্টেম সঠিকভাবে চলছে
                       </p>
@@ -519,7 +499,7 @@ export default function StatusPage() {
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
+                  <i className="bi bi-clock text-xl text-muted-foreground"></i>
                   <CardTitle className="text-lg">সাম্প্রতিক চেক</CardTitle>
                 </div>
               </CardHeader>
@@ -560,7 +540,7 @@ export default function StatusPage() {
             <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5 text-green-600" />
+                  <i className="bi bi-bar-chart text-xl text-green-600"></i>
                   <CardTitle className="text-lg text-green-700">
                     অ্যাপ্লিকেশন পরিসংখ্যান
                   </CardTitle>
@@ -618,9 +598,9 @@ export default function StatusPage() {
       <Footer />
 
       <AddSpotModal
-        open={addModalOpen}
-        onOpenChange={setAddModalOpen}
-        onSuccess={() => {}}
+        isOpen={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onAdd={() => setAddModalOpen(false)}
       />
     </div>
   );

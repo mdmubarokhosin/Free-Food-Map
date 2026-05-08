@@ -517,6 +517,85 @@ body {
 }
 
 /* ============================================
+   New Spot Card (left-border gradient)
+   ============================================ */
+.new-spot-card {
+  position: relative;
+  border-left: 4px solid transparent;
+  border-image: linear-gradient(to bottom, #ff6b00, #28a745) 1;
+}
+
+/* ============================================
+   Live Dot Indicator
+   ============================================ */
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: pulse-dot 2s infinite;
+}
+
+/* Dark mode adjustments for gradient helpers */
+.dark .gradient-header {
+  background: linear-gradient(to bottom, hsl(var(--card)) 70%, hsl(var(--card) / 0.4) 85%, transparent);
+}
+
+.dark .gradient-card {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+.dark .gradient-hero {
+  background: linear-gradient(135deg, #0a4f7a, #0a7e8c, #0f5132);
+}
+
+.dark .gradient-accent {
+  background: linear-gradient(135deg, #cc5500, #cc481e);
+}
+
+.dark .gradient-primary {
+  background: linear-gradient(135deg, #0a5ccc, #094cb5);
+}
+
+.dark .gradient-success {
+  background: linear-gradient(135deg, #137a42, #10593a);
+}
+
+.dark .gradient-info {
+  background: linear-gradient(135deg, #0aafbe, #0aafbe99);
+}
+
+.dark .gradient-warning {
+  background: linear-gradient(135deg, #cca006, #cc7a00);
+}
+
+.dark .gradient-danger {
+  background: linear-gradient(135deg, #b02a37, #a01c2a);
+}
+
+.dark .gradient-purple {
+  background: linear-gradient(135deg, #5a359a, #7c48a3);
+}
+
+.dark .gradient-ocean {
+  background: linear-gradient(135deg, #005f90, #008fad, #72b3bf);
+}
+
+.dark .gradient-sunset {
+  background: linear-gradient(135deg, #cc5555, #cc481e, #c07623);
+}
+
+.dark .gradient-forest {
+  background: linear-gradient(135deg, #0f5114, #246125, #2c8c00);
+}
+
+/* Dark mode new-spot-card */
+.dark .new-spot-card {
+  border-image: linear-gradient(to bottom, #ff9933, #3da342) 1;
+}
+
+/* ============================================
    Print Styles
    ============================================ */
 @media print {

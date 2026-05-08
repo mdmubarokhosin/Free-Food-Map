@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import {
   verifyAdminPassword, fetchSpots, updateSpot, deleteSpot,
   fetchEvents, createEvent, updateEvent, deleteEvent as deleteEventFn,
@@ -53,6 +54,8 @@ export default function AdminPage() {
     }
   };
 
+  const [operating, setOperating] = useState(false);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
@@ -64,6 +67,7 @@ export default function AdminPage() {
       setTeam(t); setReports(r); setStats(st); setSettings(set);
     } catch (err) {
       console.error("Load data error:", err);
+      toast.error("ডেটা লোড করতে সমস্যা হয়েছে। Firebase সংযোগ পরীক্ষা করুন।");
     }
     setLoading(false);
   }, []);
@@ -72,11 +76,11 @@ export default function AdminPage() {
     if (authenticated) loadData();
   }, [authenticated, loadData]);
 
-  const refreshSpots = async () => setSpots(await fetchSpots());
-  const refreshEvents = async () => setEvents(await fetchEvents());
-  const refreshDonations = async () => setDonations(await fetchDonations());
-  const refreshTeam = async () => setTeam(await fetchTeamMembers());
-  const refreshReports = async () => setReports(await fetchReports());
+  const refreshSpots = async () => { try { setSpots(await fetchSpots()); } catch { toast.error("স্পট রিফ্রেশ ব্যর্থ"); } };
+  const refreshEvents = async () => { try { setEvents(await fetchEvents()); } catch { toast.error("ইভেন্ট রিফ্রেশ ব্যর্থ"); } };
+  const refreshDonations = async () => { try { setDonations(await fetchDonations()); } catch { toast.error("অনুদান রিফ্রেশ ব্যর্থ"); } };
+  const refreshTeam = async () => { try { setTeam(await fetchTeamMembers()); } catch { toast.error("টিম রিফ্রেশ ব্যর্থ"); } };
+  const refreshReports = async () => { try { setReports(await fetchReports()); } catch { toast.error("রিপোর্ট রিফ্রেশ ব্যর্থ"); } };
 
   // Login Screen
   if (!authenticated) {
@@ -149,7 +153,7 @@ export default function AdminPage() {
       <aside className={`admin-sidebar bg-card border-r border-border flex-col ${sidebarOpen ? "w-60" : "w-16"} transition-all duration-300 shrink-0 hidden md:flex`}>
         <div className="p-4 border-b border-border flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
-            🍽️
+            <i className="bi bi-cup-hot-fill text-xs"></i>
           </div>
           {sidebarOpen && <span className="font-bold text-sm text-foreground truncate">এডমিন প্যানেল</span>}
         </div>
@@ -190,7 +194,9 @@ export default function AdminPage() {
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🍽️</span>
+          <div className="w-6 h-6 rounded bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center">
+            <i className="bi bi-cup-hot-fill text-white text-[10px]"></i>
+          </div>
           <span className="font-bold text-sm">এডমিন</span>
         </div>
         <div className="flex gap-1 overflow-x-auto">
@@ -222,8 +228,8 @@ export default function AdminPage() {
                 spots={spots} onRefresh={refreshSpots}
                 onEdit={(s) => setEditModal({ type: "spot", data: s })}
                 onDelete={(s) => setDeleteConfirm({ type: "spot", id: s.id, name: s.name })}
-                onVerify={async (id, v) => { await updateSpot(id, { verified: v }); refreshSpots(); }}
-                onToggleActive={async (id, a) => { await updateSpot(id, { active: a }); refreshSpots(); }}
+                onVerify={async (id, v) => { try { await updateSpot(id, { verified: v }); refreshSpots(); toast.success(v ? "স্পট নিশ্চিত করা হয়েছে" : "নিশ্চিততা সরানো হয়েছে"); } catch { toast.error("অপারেশন ব্যর্থ"); } }}
+                onToggleActive={async (id, a) => { try { await updateSpot(id, { active: a }); refreshSpots(); toast.success(a ? "স্পট সক্রিয় করা হয়েছে" : "স্পট নিষ্ক্রিয় করা হয়েছে"); } catch { toast.error("অপারেশন ব্যর্থ"); } }}
               />
             )}
             {activeTab === "events" && (
@@ -231,14 +237,14 @@ export default function AdminPage() {
                 events={events} onRefresh={refreshEvents}
                 onEdit={(e) => setEditModal({ type: "event", data: e })}
                 onDelete={(e) => setDeleteConfirm({ type: "event", id: e.id, name: e.title })}
-                onAdd={async (d) => { await createEvent(d as any); refreshEvents(); }}
+                onAdd={async (d) => { try { await createEvent(d as any); refreshEvents(); toast.success("ইভেন্ট তৈরি হয়েছে"); } catch { toast.error("ইভেন্ট তৈরি ব্যর্থ"); } }}
               />
             )}
             {activeTab === "donations" && (
               <DonationsTab
                 donations={donations} onRefresh={refreshDonations}
                 onDelete={(d) => setDeleteConfirm({ type: "donation", id: d.id, name: `${d.donorName} - ৳${d.amount}` })}
-                onAdd={async (d) => { await addDonation(d); refreshDonations(); }}
+                onAdd={async (d) => { try { await addDonation(d); refreshDonations(); toast.success("অনুদান যোগ হয়েছে"); } catch { toast.error("অনুদান যোগ ব্যর্থ"); } }}
               />
             )}
             {activeTab === "team" && (
@@ -246,20 +252,20 @@ export default function AdminPage() {
                 team={team} onRefresh={refreshTeam}
                 onEdit={(t) => setEditModal({ type: "team", data: t })}
                 onDelete={(t) => setDeleteConfirm({ type: "team", id: t.id, name: t.name })}
-                onAdd={async (d) => { await addTeamMember(d); refreshTeam(); }}
+                onAdd={async (d) => { try { await addTeamMember(d); refreshTeam(); toast.success("সদস্য যোগ হয়েছে"); } catch { toast.error("সদস্য যোগ ব্যর্থ"); } }}
               />
             )}
             {activeTab === "reports" && (
               <ReportsTab
                 reports={reports} onRefresh={refreshReports}
-                onUpdate={async (id, s) => { await updateReport(id, { status: s as Report["status"] }); refreshReports(); }}
+                onUpdate={async (id, s) => { try { await updateReport(id, { status: s as Report["status"] }); refreshReports(); toast.success("রিপোর্ট আপডেট হয়েছে"); } catch { toast.error("রিপোর্ট আপডেট ব্যর্থ"); } }}
                 onDelete={(r) => setDeleteConfirm({ type: "report", id: r.id, name: r.spotName })}
               />
             )}
             {activeTab === "settings" && (
               <SettingsTab
                 settings={settings}
-                onSave={async (d) => { await updateSiteSettings(d); setSettings({ ...settings!, ...d }); }}
+                onSave={async (d) => { try { await updateSiteSettings(d); setSettings({ ...settings!, ...d }); toast.success("সেটিংস সংরক্ষিত হয়েছে"); } catch { toast.error("সেটিংস সংরক্ষণ ব্যর্থ"); } }}
                 onExportCSV={handleExportCSV}
                 onExportJSON={handleExportJSON}
               />
@@ -275,17 +281,25 @@ export default function AdminPage() {
           data={editModal.data}
           onClose={() => setEditModal(null)}
           onSave={async (data) => {
-            if (editModal.type === "spot") {
-              await updateSpot(editModal.data.id, data);
-              refreshSpots();
-            } else if (editModal.type === "event") {
-              await updateEvent(editModal.data.id, data);
-              refreshEvents();
-            } else if (editModal.type === "team") {
-              await updateTeamMember(editModal.data.id, data);
-              refreshTeam();
+            try {
+              if (editModal.type === "spot") {
+                await updateSpot(editModal.data.id, data);
+                refreshSpots();
+                toast.success("স্পট আপডেট হয়েছে");
+              } else if (editModal.type === "event") {
+                await updateEvent(editModal.data.id, data);
+                refreshEvents();
+                toast.success("ইভেন্ট আপডেট হয়েছে");
+              } else if (editModal.type === "team") {
+                await updateTeamMember(editModal.data.id, data);
+                refreshTeam();
+                toast.success("সদস্য আপডেট হয়েছে");
+              }
+              setEditModal(null);
+            } catch (err) {
+              console.error("Save error:", err);
+              toast.error("সংরক্ষণ ব্যর্থ হয়েছে");
             }
-            setEditModal(null);
           }}
         />
       )}
@@ -312,7 +326,11 @@ export default function AdminPage() {
                       else if (deleteConfirm.type === "donation") await deleteDonationFn(deleteConfirm.id);
                       else if (deleteConfirm.type === "team") await deleteTeamMemberFn(deleteConfirm.id);
                       else if (deleteConfirm.type === "report") await deleteReportFn(deleteConfirm.id);
-                    } catch {}
+                      toast.success("সফলভাবে মুছে ফেলা হয়েছে");
+                    } catch (err) {
+                      console.error("Delete error:", err);
+                      toast.error("মুছে ফেলতে সমস্যা হয়েছে");
+                    }
                     setDeleteConfirm(null);
                     loadData();
                   }}
@@ -391,7 +409,7 @@ function DashboardTab({ stats, spots, donations, reports }: { stats: AppStats | 
         <div className="space-y-2">
           {spots.slice(0, 5).map((s) => (
             <div key={s.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary transition-colors">
-              <span className="text-xl">{SPOT_TYPE_CONFIG[s.type]?.emoji || "🍽️"}</span>
+              <span className="text-xl">{SPOT_TYPE_CONFIG[s.type]?.emoji || <i className="bi bi-cup-hot text-xl"></i>}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
                 <p className="text-xs text-muted-foreground">{s.area || s.city}</p>
@@ -875,10 +893,18 @@ function EditModal({ type, data, onClose, onSave }: {
   onSave: (data: any) => void;
 }) {
   const [form, setForm] = useState({ ...data });
+  const [saving, setSaving] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form);
+    setSaving(true);
+    try {
+      const { id, createdAt, updatedAt, ...cleanData } = form;
+      await onSave(cleanData);
+    } catch (err) {
+      console.error("Edit save error:", err);
+    }
+    setSaving(false);
   };
 
   return (
@@ -894,33 +920,46 @@ function EditModal({ type, data, onClose, onSave }: {
           {type === "spot" && (
             <>
               <input placeholder="নাম *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input placeholder="শহর" value={form.city || ""} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
               <input placeholder="এলাকা" value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
               <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
                 {Object.entries(SPOT_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
               </select>
               <textarea placeholder="ঠিকানা" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <input placeholder="নোটস" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input placeholder="নোটস" value={form.notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value || null })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </>
           )}
           {type === "event" && (
             <>
               <input placeholder="শিরোনাম *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <textarea placeholder="বিবরণ" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
               <input placeholder="লোকেশন" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
               <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input type="time" value={form.time || ""} onChange={(e) => setForm({ ...form, time: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input placeholder="আয়োজক" value={form.organizer || ""} onChange={(e) => setForm({ ...form, organizer: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <select value={form.status || "upcoming"} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+                <option value="upcoming">আসন্ন</option>
+                <option value="ongoing">চলমান</option>
+                <option value="completed">সম্পন্ন</option>
+                <option value="cancelled">বাতিল</option>
+              </select>
             </>
           )}
           {type === "team" && (
             <>
               <input placeholder="নাম *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
               <input placeholder="ভূমিকা *" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <textarea placeholder="বায়ো" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none" />
+              <textarea placeholder="বায়ো" value={form.bio || ""} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none" />
               <input placeholder="Facebook URL" value={form.social?.facebook || ""} onChange={(e) => setForm({ ...form, social: { ...form.social, facebook: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
-              <input placeholder="ফোন" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input placeholder="ইমেইল" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input placeholder="ফোন" value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
             </>
           )}
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors">বাতিল</button>
-            <button type="submit" className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all">সংরক্ষণ করুন</button>
+            <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all disabled:opacity-50">
+              {saving ? "সংরক্ষণ হচ্ছে..." : "সংরক্ষণ করুন"}
+            </button>
           </div>
         </form>
       </div>

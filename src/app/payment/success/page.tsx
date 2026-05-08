@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CheckCircle, ArrowLeft, RefreshCw } from 'lucide-react';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -21,7 +21,7 @@ function PaymentSuccessContent() {
         <Card className="w-full max-w-md border-0 shadow-xl">
           <CardHeader className="text-center">
             <div className="mx-auto w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-              <CheckCircle className="h-10 w-10 text-green-600" />
+              <i className="bi bi-check-circle text-4xl text-green-600"></i>
             </div>
             <CardTitle className="text-2xl text-green-600">পেমেন্ট সফল!</CardTitle>
             <CardDescription>
@@ -38,7 +38,7 @@ function PaymentSuccessContent() {
             
             <Button asChild className="w-full bg-green-600 hover:bg-green-700">
               <Link href="/">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <i className="bi bi-arrow-left text-base mr-2"></i>
                 হোমপেজে ফিরে যান
               </Link>
             </Button>

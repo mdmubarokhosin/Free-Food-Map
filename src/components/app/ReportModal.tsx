@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { ref, push } from 'firebase/database';
+import { database } from '@/lib/firebase';
 import {
   Dialog,
   DialogContent,
@@ -58,32 +60,28 @@ export default function ReportModal({
     setLoading(true);
 
     try {
-      const response = await fetch('/api/reports', {
-        method: 'POST',
+      // Write directly to Firebase Realtime Database
+      const reportsRef = ref(database, 'reports');
+      const newReportRef = push(reportsRef);
+      
+      await fetch(`https://bazar-31839-default-rtdb.firebaseio.com/reports/${newReportRef.key}.json`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           spotId,
           spotName,
-          reportType,
-          details: details.trim(),
+          type: reportType,
+          description: details.trim(),
+          status: 'pending',
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
         }),
       });
 
-      const data = await response.json();
-
-      if (!data.success) {
-        toast({
-          title: 'রিপোর্ট করতে সমস্যা হয়েছে',
-          description: data.error || 'আবার চেষ্টা করুন',
-          variant: 'destructive',
-        });
-        return;
-      }
-
       // Show success toast
       toast({
-        title: 'রিপোর্ট সফল হয়েছে',
-        description: 'আপনার রিপোর্ট আমাদের কাছে পৌঁছে গেছে। ধন্যবাদ!',
+        title: 'রিপোর্ট সফলভাবে জমা হয়েছে!',
+        description: 'এডমিন যাচাই করবেন। ধন্যবাদ!',
       });
 
       // Reset form and close modal

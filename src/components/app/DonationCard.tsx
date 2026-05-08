@@ -126,37 +126,9 @@ export default function DonationCard({ tier, onSelect }: DonationCardProps) {
       return;
     }
 
-    setLoading(true);
-    try {
-      const response = await fetch('/api/payment/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: formData.anonymous ? 'বেনামী দাতা' : formData.name,
-          email: formData.email,
-          amount: amount,
-          type: 'donation',
-          tier: tier.id,
-          message: formData.message,
-          anonymous: formData.anonymous,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.paymentUrl) {
-        toast.success('পেমেন্ট পেজে রিডাইরেক্ট হচ্ছে...');
-        // Redirect to Bohudur payment page
-        window.location.href = data.paymentUrl;
-      } else {
-        toast.error(data.error || 'পেমেন্ট তৈরি করতে সমস্যা হয়েছে');
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast.error('পেমেন্ট তৈরি করতে সমস্যা হয়েছে');
-    } finally {
-      setLoading(false);
-    }
+    // Show "coming soon" toast and close dialog
+    toast.info('দুঃখিত, পেমেন্ট সিস্টেম শীঘ্রই আসছে!');
+    setDialogOpen(false);
   };
 
   const resetForm = () => {

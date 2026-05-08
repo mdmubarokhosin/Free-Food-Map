@@ -1,5 +1,1 @@
-# Cloudflare Pages redirects for static export
-# Handle SPA-like routes - all pages are pre-rendered as .html files
-
-# 404 handler
-/*  /404.html  404
+/*  /index.html  200

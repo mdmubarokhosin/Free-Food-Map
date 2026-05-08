@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Calendar as CalendarIcon, List, Filter, CalendarDays, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,7 @@ export default function EventsPage() {
         });
         
         if (data.success) {
-          setEvents(data.events);
+          setEvents(data.events || []);
         }
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -174,7 +174,7 @@ export default function EventsPage() {
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-xl">
-              <CalendarDays className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <i className="bi bi-calendar3 text-2xl text-green-600 dark:text-green-400"></i>
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
@@ -195,11 +195,11 @@ export default function EventsPage() {
               <Tabs value={view} onValueChange={(v) => setView(v as 'calendar' | 'list')} className="w-full sm:w-auto">
                 <TabsList className="bg-gray-100 dark:bg-gray-800 h-9 w-full sm:w-auto">
                   <TabsTrigger value="list" className="text-xs px-3 h-7 flex-1 sm:flex-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-                    <List className="h-3.5 w-3.5 mr-1" />
+                    <i className="bi bi-list-ul text-sm mr-1"></i>
                     তালিকা
                   </TabsTrigger>
                   <TabsTrigger value="calendar" className="text-xs px-3 h-7 flex-1 sm:flex-none data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
-                    <CalendarIcon className="h-3.5 w-3.5 mr-1" />
+                    <i className="bi bi-calendar text-sm mr-1"></i>
                     ক্যালেন্ডার
                   </TabsTrigger>
                 </TabsList>
@@ -211,7 +211,7 @@ export default function EventsPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-9 text-xs gap-1.5 w-full sm:w-auto">
-                    <Filter className="h-3.5 w-3.5" />
+                    <i className="bi bi-funnel text-sm"></i>
                     ধরন: {filterType === 'all' ? 'সব' : EVENT_TYPE_LABELS[filterType as EventType]}
                   </Button>
                 </DropdownMenuTrigger>
@@ -280,13 +280,13 @@ export default function EventsPage() {
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+            <i className="bi bi-arrow-repeat text-3xl animate-spin text-green-600"></i>
             <span className="ml-2 text-muted-foreground">লোড হচ্ছে...</span>
           </div>
         ) : events.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-12 text-center">
-              <CalendarDays className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <i className="bi bi-calendar3 text-5xl mx-auto text-muted-foreground mb-4"></i>
               <h3 className="text-lg font-medium mb-2">কোনো ইভেন্ট পাওয়া যায়নি</h3>
               <p className="text-sm text-muted-foreground">
                 ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন
@@ -305,10 +305,10 @@ export default function EventsPage() {
                   </CardTitle>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToPreviousMonth}>
-                      <ChevronLeft className="h-4 w-4" />
+                      <i className="bi bi-chevron-left text-base"></i>
                     </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToNextMonth}>
-                      <ChevronRight className="h-4 w-4" />
+                      <i className="bi bi-chevron-right text-base"></i>
                     </Button>
                   </div>
                 </div>

@@ -47,6 +47,8 @@ function transformFirebaseSpot(fbSpot: Record<string, unknown>): Spot {
     startDate: (fbSpot.startDate || null) as string | null,
     endDate: (fbSpot.endDate || null) as string | null,
     autoDelete: fbSpot.autoDelete === true,
+    positiveVotes: Number(fbSpot.positiveVotes) || 0,
+    negativeVotes: Number(fbSpot.negativeVotes) || 0,
   };
 }
 

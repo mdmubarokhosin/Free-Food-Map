@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -30,11 +31,6 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossOrigin=""
-        />
-        <link
-          rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
           crossOrigin=""
         />
       </head>

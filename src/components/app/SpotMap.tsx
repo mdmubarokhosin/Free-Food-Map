@@ -122,29 +122,29 @@ export default function SpotMap({
           <div style="background:linear-gradient(135deg,${config.color},${config.color}cc);padding:12px 14px;color:white;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
               ${isNew ? '<span style="background:#ff8000;color:white;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;">নতুন</span>' : ""}
-              ${spot.verified ? '<span style="background:rgba(255,255,255,0.25);color:white;font-size:9px;font-weight:600;padding:2px 6px;border-radius:10px;">✓ নিশ্চিত</span>' : ""}
+              ${spot.verified ? '<span style="background:rgba(255,255,255,0.25);color:white;font-size:9px;font-weight:600;padding:2px 6px;border-radius:10px;"><i class="bi bi-check-lg" style="font-size:9px;"></i> নিশ্চিত</span>' : ""}
             </div>
             <h3 style="margin:6px 0 2px;font-size:15px;font-weight:700;line-height:1.3;">${spot.name}</h3>
             <span style="font-size:11px;opacity:0.9;">${config.emoji} ${config.label}</span>
           </div>
           <div style="padding:12px 14px;">
             <p style="margin:0 0 8px;font-size:13px;color:#555;display:flex;align-items:center;gap:4px;">
-              📍 ${spot.area || spot.address || spot.city}
+              <i class="bi bi-geo-alt" style="color:#e74c3c;font-size:12px;"></i> ${spot.area || spot.address || spot.city}
             </p>
-            ${spot.openTime && spot.closeTime ? `<p style="margin:0 0 8px;font-size:12px;color:#888;">🕐 ${spot.openTime} - ${spot.closeTime}</p>` : ""}
+            ${spot.openTime && spot.closeTime ? `<p style="margin:0 0 8px;font-size:12px;color:#888;display:flex;align-items:center;gap:4px;"><i class="bi bi-clock" style="font-size:11px;"></i> ${spot.openTime} - ${spot.closeTime}</p>` : ""}
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <a href="https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}" target="_blank" rel="noopener"
                  style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;background:#2d7a30;color:white;font-size:12px;text-decoration:none;font-weight:600;">
-                🧭 দিকনির্দেশনা
+                <i class="bi bi-cursor-fill" style="font-size:11px;"></i> দিকনির্দেশনা
               </a>
               ${!isVoted ? `
               <button onclick="window.dispatchEvent(new CustomEvent('popupVote',{detail:{id:'${spot.id}',type:'true'}}))"
-                      style="padding:6px 12px;border-radius:8px;background:#22c55e;color:white;font-size:12px;border:none;cursor:pointer;font-weight:600;">
-                👍 ${spot.positiveVotes}
+                      style="padding:6px 12px;border-radius:8px;background:#22c55e;color:white;font-size:12px;border:none;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:3px;">
+                <i class="bi bi-hand-thumbs-up-fill" style="font-size:11px;"></i> ${spot.positiveVotes}
               </button>
               <button onclick="window.dispatchEvent(new CustomEvent('popupVote',{detail:{id:'${spot.id}',type:'false'}}))"
-                      style="padding:6px 12px;border-radius:8px;background:#ef4444;color:white;font-size:12px;border:none;cursor:pointer;font-weight:600;">
-                👎 ${spot.negativeVotes}
+                      style="padding:6px 12px;border-radius:8px;background:#ef4444;color:white;font-size:12px;border:none;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:3px;">
+                <i class="bi bi-hand-thumbs-down-fill" style="font-size:11px;"></i> ${spot.negativeVotes}
               </button>` : `
               <span style="padding:6px 12px;border-radius:8px;background:#e5e7eb;color:#666;font-size:12px;font-weight:500;">ইতিমধ্যে ভোট দিয়েছেন</span>`}
             </div>

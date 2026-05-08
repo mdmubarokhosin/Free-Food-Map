@@ -109,9 +109,12 @@ export default function BottomSheet({
             <div className="spinner"></div>
           </div>
         ) : spots.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground text-sm">
-            <p className="text-3xl mb-2"><i className="bi bi-map text-muted-foreground"></i></p>
-            <p>কোন স্পট পাওয়া যায়নি</p>
+          <div className="text-center py-8">
+            <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-secondary/50 flex items-center justify-center">
+              <i className="bi bi-map text-3xl text-muted-foreground/50"></i>
+            </div>
+            <p className="text-sm font-medium text-muted-foreground">কোন স্পট পাওয়া যায়নি</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">নতুন স্পট যোগ করতে উপরের বাটনে ক্লিক করুন</p>
           </div>
         ) : (
           <>
@@ -192,8 +195,10 @@ function SpotCard({
       onClick={onClick}
       className={`p-3 rounded-xl cursor-pointer transition-all duration-200 ${
         isLatest
-          ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-md animate-pulse-glow"
-          : "bg-card hover:bg-secondary/50 shadow-sm hover:shadow-lg hover:-translate-y-0.5"
+          ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-300/30 animate-pulse-glow"
+          : isNew
+          ? "new-spot-card bg-card hover:bg-secondary/50 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+          : "bg-card hover:bg-secondary/50 shadow-sm hover:shadow-md hover:-translate-y-0.5"
       } ${isSelected ? "ring-2 ring-primary" : ""}`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -245,13 +250,13 @@ function SpotCard({
         <div className="flex items-center gap-1 shrink-0 sm:flex-col">
           <button
             onClick={(e) => { e.stopPropagation(); onLike(); }}
-            className="flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-semibold bg-green-500/10 text-green-600 hover:bg-green-500/20 transition-colors"
+            className={`flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-semibold transition-all ${isLatest ? "bg-white/20 text-white hover:bg-white/30" : "bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-600 hover:from-green-500/20 hover:to-emerald-500/20"}`}
           >
             <i className="bi bi-hand-thumbs-up text-[10px]"></i> {spot.positiveVotes}
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onDislike(); }}
-            className="flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-semibold bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+            className={`flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-semibold transition-all ${isLatest ? "bg-white/20 text-white hover:bg-white/30" : "bg-gradient-to-r from-red-500/10 to-rose-500/10 text-red-500 hover:from-red-500/20 hover:to-rose-500/20"}`}
           >
             <i className="bi bi-hand-thumbs-down text-[10px]"></i> {spot.negativeVotes}
           </button>

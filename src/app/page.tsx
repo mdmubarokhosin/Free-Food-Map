@@ -111,8 +111,8 @@ export default function HomePage() {
           {/* Logo */}
           <div className="flex items-center gap-2 shrink-0">
             <a href="/" className="flex items-center gap-2 hover:scale-105 transition-transform">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                🍽️
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-200/50">
+                <i className="bi bi-cup-hot text-base"></i>
               </div>
               <h1 className="text-lg font-bold text-foreground hidden sm:block">
                 ফ্রি ফুড ম্যাপ
@@ -138,7 +138,7 @@ export default function HomePage() {
           <div className="flex items-center gap-2 shrink-0">
             {/* Live Badge */}
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse-dot"></span>
+              <span className="live-dot"></span>
               <span className="hidden sm:inline">সরাসরি</span>
             </div>
 
@@ -159,8 +159,12 @@ export default function HomePage() {
         {/* Loading Overlay */}
         {loading && (
           <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
-            <div className="spinner mb-3"></div>
-            <p className="text-sm text-muted-foreground">ম্যাপ লোড হচ্ছে...</p>
+            <div className="relative mb-3">
+              <div className="spinner"></div>
+              <i className="bi bi-cup-hot absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-accent text-sm"></i>
+            </div>
+            <p className="text-sm text-muted-foreground font-medium">ম্যাপ লোড হচ্ছে...</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">স্পট খুঁজে আনা হচ্ছে</p>
           </div>
         )}
 
@@ -218,7 +222,10 @@ export default function HomePage() {
 
       {/* Floating Footer */}
       <footer className="glass fixed bottom-0 left-0 right-0 z-[999] py-2 text-center text-xs text-muted-foreground no-print pointer-events-none backdrop-blur-md bg-white/30 border-t border-white/20">
-        ফ্রি ফুড ম্যাপ &copy; {new Date().getFullYear()} — দরিদ্রদের জন্য বিনামূল্যে খাবার
+        <span className="inline-flex items-center gap-1.5">
+          <i className="bi bi-cup-hot text-accent text-xs"></i>
+          ফ্রি ফুড ম্যাপ &copy; {new Date().getFullYear()} — দরিদ্রদের জন্য বিনামূল্যে খাবার
+        </span>
       </footer>
     </div>
   );

@@ -122,14 +122,24 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
       {/* Modal */}
       <div className="relative w-full max-w-lg mx-0 sm:mx-4 mb-0 sm:mb-0 bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl animate-slide-up sm:animate-fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500 px-5 py-4 rounded-t-2xl sm:rounded-t-2xl">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white">নতুন স্পট যোগ করুন</h2>
-            <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
-              <i className="bi bi-x-lg"></i>
-            </button>
+        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 px-5 py-4 rounded-t-2xl sm:rounded-t-2xl relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <i className="bi bi-cup-hot-fill absolute top-2 right-4 text-6xl text-white rotate-12"></i>
           </div>
-          <p className="text-white/80 text-xs mt-1">বিনামূল্যে খাবার বিতরণের স্থান তথ্য দিন</p>
+          <div className="relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <i className="bi bi-plus-circle-fill text-white text-sm"></i>
+                </div>
+                <h2 className="text-lg font-bold text-white">নতুন স্পট যোগ করুন</h2>
+              </div>
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <p className="text-white/80 text-xs mt-1 ml-10">বিনামূল্যে খাবার বিতরণের স্থান তথ্য দিন</p>
+          </div>
         </div>
 
         {/* Form */}
@@ -140,6 +150,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
           {/* Name */}
           <div>
             <label className="block text-sm font-semibold text-foreground mb-1">
+              <i className="bi bi-shop text-orange-400 mr-1"></i>
               স্থানের নাম <span className="text-destructive">*</span>
             </label>
             <div className="relative">
@@ -159,6 +170,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
           {/* Area */}
           <div>
             <label className="block text-sm font-semibold text-foreground mb-1">
+              <i className="bi bi-pin-map text-orange-400 mr-1"></i>
               এলাকা / মহল্লা <span className="text-destructive">*</span>
             </label>
             <div className="relative">
@@ -178,24 +190,29 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
           {/* Food Type */}
           <div>
             <label className="block text-sm font-semibold text-foreground mb-1">
+              <i className="bi bi-list-ul text-orange-400 mr-1"></i>
               খাবারের ধরন <span className="text-destructive">*</span>
             </label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value as SpotType)}
-              className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
-            >
-              {Object.entries(SPOT_TYPE_CONFIG).map(([key, cfg]) => (
-                <option key={key} value={key}>
-                  {cfg.emoji} {cfg.label}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <i className="bi bi-list-ul absolute left-3 top-1/2 -translate-y-1/2 text-orange-400"></i>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value as SpotType)}
+                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all appearance-none"
+              >
+                {Object.entries(SPOT_TYPE_CONFIG).map(([key, cfg]) => (
+                  <option key={key} value={key}>
+                    {cfg.emoji} {cfg.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Location */}
           <div>
             <label className="block text-sm font-semibold text-foreground mb-1">
+              <i className="bi bi-geo-alt text-orange-400 mr-1"></i>
               লোকেশন <span className="text-destructive">*</span>
             </label>
             <div className="flex gap-2 mb-2">
@@ -286,6 +303,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
           {/* Notes */}
           <div>
             <label className="block text-sm font-semibold text-foreground mb-1">
+              <i className="bi bi-chat-left-text text-orange-400 mr-1"></i>
               বিবরণ (ঐচ্ছিক)
             </label>
             <textarea
@@ -301,9 +319,13 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
           <button
             type="submit"
             disabled={submitting || !name.trim() || !area.trim() || !lat || !lng}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:via-amber-600 hover:to-orange-700 text-white font-bold text-sm hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center justify-center gap-2"
           >
-            {submitting ? "সংরক্ষণ হচ্ছে..." : "স্পট যোগ করুন"}
+            {submitting ? (
+              <><div className="spinner w-4 h-4 border-2 border-white/30 border-t-white"></div> সংরক্ষণ হচ্ছে...</>
+            ) : (
+              <><i className="bi bi-check-circle text-sm"></i> স্পট যোগ করুন</>
+            )}
           </button>
 
           <p className="text-center text-[11px] text-muted-foreground">
