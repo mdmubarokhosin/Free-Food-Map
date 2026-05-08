@@ -1,0 +1,525 @@
+@import "tailwindcss";
+
+/* ============================================
+   Free Food Map — Design System
+   Inspired by biriyanidibe color palette
+   ============================================ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+}
+
+:root {
+  --background: 40 33% 96%;
+  --foreground: 20 20% 15%;
+  --card: 40 30% 98%;
+  --card-foreground: 20 20% 15%;
+  --popover: 40 30% 98%;
+  --popover-foreground: 20 20% 15%;
+  --primary: 122 42% 33%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 30% 92%;
+  --secondary-foreground: 20 20% 15%;
+  --muted: 40 20% 90%;
+  --muted-foreground: 20 10% 45%;
+  --accent: 24 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 40 20% 88%;
+  --input: 40 20% 88%;
+  --ring: 122 42% 33%;
+  --radius: 0.75rem;
+  --success: 142 71% 35%;
+  --warning: 38 92% 50%;
+  --info: 217 91% 60%;
+
+  /* Custom brand colors */
+  --color-saffron: #ff8000;
+  --color-saffron-light: #fff3e2;
+  --color-green-masjid: #2d7a30;
+  --color-green-light: #dbf0e3;
+
+  /* Sidebar */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 20 20% 15%;
+  --sidebar-primary: 122 42% 33%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 40 30% 92%;
+  --sidebar-accent-foreground: 20 20% 15%;
+  --sidebar-border: 40 20% 88%;
+  --sidebar-ring: 122 42% 33%;
+
+  /* Chart */
+  --chart-1: 122 42% 33%;
+  --chart-2: 24 100% 50%;
+  --chart-3: 38 92% 50%;
+  --chart-4: 217 91% 60%;
+  --chart-5: 262 83% 58%;
+}
+
+.dark {
+  --background: 20 15% 8%;
+  --foreground: 40 20% 92%;
+  --card: 20 15% 12%;
+  --card-foreground: 40 20% 92%;
+  --popover: 20 15% 12%;
+  --popover-foreground: 40 20% 92%;
+  --primary: 122 42% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 20 15% 18%;
+  --secondary-foreground: 40 20% 92%;
+  --muted: 20 15% 16%;
+  --muted-foreground: 40 15% 60%;
+  --accent: 24 100% 55%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 20 15% 20%;
+  --input: 20 15% 20%;
+  --ring: 122 42% 45%;
+
+  --color-saffron: #ff9933;
+  --color-saffron-light: #2d1f0a;
+  --color-green-masjid: #3da342;
+  --color-green-light: #0a2610;
+
+  --sidebar-background: 20 15% 10%;
+  --sidebar-foreground: 40 20% 92%;
+  --sidebar-primary: 122 42% 45%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 20 15% 16%;
+  --sidebar-accent-foreground: 40 20% 92%;
+  --sidebar-border: 20 15% 20%;
+  --sidebar-ring: 122 42% 45%;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes spot-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes marker-pulse {
+  0%, 100% { transform: rotate(-45deg) scale(1); }
+  50% { transform: rotate(-45deg) scale(1.1); }
+}
+
+@keyframes marker-glow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(255, 128, 0, 0.4); }
+  50% { box-shadow: 0 0 16px 6px rgba(255, 128, 0, 0.7); }
+}
+
+@keyframes badge-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+@keyframes pulse-dot {
+  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 128, 0, 0.2); }
+  50% { box-shadow: 0 0 15px rgba(255, 128, 0, 0.4); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes popup-bounce-in {
+  0% { transform: scale(0.8) translateY(10px); opacity: 0; }
+  60% { transform: scale(1.02) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-spot-blink { animation: spot-blink 1.5s infinite; }
+.animate-marker-pulse { animation: marker-pulse 2s infinite; }
+.animate-marker-glow { animation: marker-glow 2s infinite; }
+.animate-badge-bounce { animation: badge-bounce 1s infinite; }
+.animate-pulse-dot { animation: pulse-dot 2s infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+}
+.animate-bounce-subtle { animation: bounce-subtle 2s infinite; }
+.animate-popup-bounce { animation: popup-bounce-in 0.3s ease-out; }
+.animate-spin-slow { animation: spin-slow 2s linear infinite; }
+.animate-fade-in { animation: fade-in 0.3s ease-out; }
+.animate-slide-up { animation: slide-up 0.4s ease-out; }
+.animate-slide-down { animation: slide-down 0.3s ease-out; }
+
+/* ============================================
+   Map Marker Styles
+   ============================================ */
+.marker-teardrop {
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.marker-teardrop:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.marker-teardrop .marker-emoji {
+  transform: rotate(45deg);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.marker-new {
+  animation: marker-pulse 2s infinite;
+  box-shadow: 0 0 12px 4px rgba(255, 128, 0, 0.5);
+}
+
+.marker-newest {
+  animation: marker-glow 2s infinite;
+  box-shadow: 0 0 20px 6px rgba(255, 128, 0, 0.6);
+}
+
+.marker-new-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff8000;
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 8px;
+  animation: badge-bounce 1s infinite;
+  transform: rotate(45deg);
+  z-index: 10;
+}
+
+/* ============================================
+   Leaflet Popup Override
+   ============================================ */
+.modern-popup .leaflet-popup-content-wrapper {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+  overflow: hidden;
+  animation: popup-bounce-in 0.3s ease-out;
+}
+
+.modern-popup .leaflet-popup-content {
+  margin: 0 !important;
+  min-width: 260px;
+}
+
+.modern-popup .leaflet-popup-tip {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+  border: none !important;
+}
+
+.modern-popup .leaflet-popup-close-button {
+  top: 8px !important;
+  right: 8px !important;
+  width: 28px !important;
+  height: 28px !important;
+  background: rgba(255,255,255,0.9) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px !important;
+  color: #333 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  z-index: 10;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+/* ============================================
+   Leaflet Controls Override
+   ============================================ */
+.leaflet-control-zoom a {
+  background: white !important;
+  color: #333 !important;
+  border: 1px solid hsl(var(--border)) !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  font-size: 18px !important;
+  transition: background 0.2s;
+}
+
+.leaflet-control-zoom a:hover {
+  background: hsl(var(--secondary)) !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(255,255,255,0.7) !important;
+  backdrop-filter: blur(4px);
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+  border-radius: 4px 0 0 0 !important;
+}
+
+.dark .leaflet-control-attribution {
+  background: rgba(0,0,0,0.5) !important;
+  color: #aaa !important;
+}
+
+.dark .leaflet-control-zoom a {
+  background: #1a1a2e !important;
+  color: #eee !important;
+  border-color: #333 !important;
+}
+
+/* ============================================
+   Bottom Sheet
+   ============================================ */
+.bottom-sheet {
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bottom-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 2px;
+  margin: 8px auto 0;
+}
+
+/* ============================================
+   Custom Scrollbar
+   ============================================ */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.4);
+}
+
+/* ============================================
+   Glassmorphism
+   ============================================ */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* ============================================
+   Gradient Helpers
+   ============================================ */
+.gradient-saffron {
+  background: linear-gradient(135deg, #ff6b00, #ff8c00, #ffa500);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #1a6b1e, #28a745, #34d058);
+}
+
+.gradient-header {
+  background: linear-gradient(to bottom, hsl(var(--card)) 70%, hsl(var(--card) / 0.6) 85%, transparent);
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, #0d6efd, #0dcaf0, #198754);
+}
+
+.gradient-card {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+}
+
+.dark .gradient-card {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+.gradient-accent {
+  background: linear-gradient(135deg, #ff6b00, #ee5a24);
+}
+
+.gradient-primary {
+  background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+}
+
+.gradient-success {
+  background: linear-gradient(135deg, #198754, #157347);
+}
+
+.gradient-info {
+  background: linear-gradient(135deg, #0dcaf0, #0dcaf0cc);
+}
+
+.gradient-warning {
+  background: linear-gradient(135deg, #ffc107, #ff9800);
+}
+
+.gradient-danger {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #6f42c1, #9b59b6);
+}
+
+.gradient-ocean {
+  background: linear-gradient(135deg, #0077b6, #00b4d8, #90e0ef);
+}
+
+.gradient-sunset {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24, #f0932b);
+}
+
+.gradient-forest {
+  background: linear-gradient(135deg, #1a6b1e, #2d7a30, #38b000);
+}
+
+/* Text gradient utility */
+.text-gradient-saffron {
+  background: linear-gradient(135deg, #ff6b00, #ee5a24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-green {
+  background: linear-gradient(135deg, #198754, #28a745);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Beautiful border gradient */
+.border-gradient {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #ff6b00, #28a745, #0dcaf0);
+}
+
+/* ============================================
+   Loading Spinner
+   ============================================ */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid hsl(var(--border));
+  border-top-color: hsl(var(--primary));
+  border-radius: 50%;
+  animation: spin-slow 0.8s linear infinite;
+}
+
+/* ============================================
+   Responsive Map
+   ============================================ */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Fix Leaflet tile rendering on mobile */
+.leaflet-tile {
+  -webkit-backface-visibility: hidden;
+}
+
+/* ============================================
+   Admin Panel
+   ============================================ */
+.admin-sidebar {
+  width: 260px;
+  transition: width 0.3s;
+}
+
+.admin-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+  .no-print { display: none !important; }
+  .leaflet-container { height: 400px !important; }
+}
