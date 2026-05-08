@@ -16,6 +16,10 @@
       ".read": true,
       ".write": true
     },
+    "sponsors": {
+      ".read": true,
+      ".write": true
+    },
     "reports": {
       ".read": true,
       ".write": true
@@ -25,6 +29,10 @@
       ".write": true
     },
     "settings": {
+      ".read": true,
+      ".write": true
+    },
+    "siteSettings": {
       ".read": true,
       ".write": true
     },
