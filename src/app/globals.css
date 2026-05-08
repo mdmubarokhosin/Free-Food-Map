@@ -185,6 +185,11 @@ body {
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
 .animate-spot-blink { animation: spot-blink 1.5s infinite; }
 .animate-marker-pulse { animation: marker-pulse 2s infinite; }
 .animate-marker-glow { animation: marker-glow 2s infinite; }
@@ -202,6 +207,7 @@ body {
 .animate-fade-in { animation: fade-in 0.3s ease-out; }
 .animate-slide-up { animation: slide-up 0.4s ease-out; }
 .animate-slide-down { animation: slide-down 0.3s ease-out; }
+.animate-slide-up-mobile-drawer { animation: slide-in-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 
 /* ============================================
    Map Marker Styles
@@ -601,4 +607,11 @@ body {
 @media print {
   .no-print { display: none !important; }
   .leaflet-container { height: 400px !important; }
+}
+
+/* ============================================
+   Safe Area Support for Mobile
+   ============================================ */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

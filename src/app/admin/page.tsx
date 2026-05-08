@@ -22,6 +22,7 @@ export default function AdminPage() {
   const [loginError, setLoginError] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // Data states
   const [spots, setSpots] = useState<Spot[]>([]);
@@ -53,8 +54,6 @@ export default function AdminPage() {
       setLoginError("পাসওয়ার্ড ভুল হয়েছে");
     }
   };
-
-  const [operating, setOperating] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -126,6 +125,11 @@ export default function AdminPage() {
     { id: "settings", label: "সেটিংস", icon: <i className="bi bi-gear-fill"></i> },
   ];
 
+  const handleTabChange = (tabId: Tab) => {
+    setActiveTab(tabId);
+    setMobileDrawerOpen(false);
+  };
+
   const handleExportCSV = () => {
     const csv = exportSpotsToCSV(spots);
     const blob = new Blob([csv], { type: "text/csv" });
@@ -149,7 +153,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
+      {/* Desktop Sidebar */}
       <aside className={`admin-sidebar bg-card border-r border-border flex-col ${sidebarOpen ? "w-60" : "w-16"} transition-all duration-300 shrink-0 hidden md:flex`}>
         <div className="p-4 border-b border-border flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
@@ -157,15 +161,15 @@ export default function AdminPage() {
           </div>
           {sidebarOpen && <span className="font-bold text-sm text-foreground truncate">এডমিন প্যানেল</span>}
         </div>
-        <nav className="flex-1 p-2 space-y-1 overflow-auto">
+        <nav className="flex-1 p-2 space-y-1 overflow-auto custom-scrollbar">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.id
-                  ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-200"
-                  : "text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700"
+                  ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg dark:shadow-emerald-900/40"
+                  : "text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
               }`}
             >
               <span className="text-base shrink-0">{tab.icon}</span>
@@ -192,30 +196,91 @@ export default function AdminPage() {
       </aside>
 
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center">
-            <i className="bi bi-cup-hot-fill text-white text-[10px]"></i>
-          </div>
-          <span className="font-bold text-sm">এডমিন</span>
-        </div>
-        <div className="flex gap-1 overflow-x-auto">
-          {tabs.map((tab) => (
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-2 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : "text-muted-foreground bg-secondary"
-              }`}
+              onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+              className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center active:scale-95 transition-transform"
+              aria-label="মেনু"
             >
-              {tab.icon}
+              <i className={`bi ${mobileDrawerOpen ? "bi-x-lg" : "bi-list"} text-lg text-foreground`}></i>
             </button>
-          ))}
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center">
+                <i className="bi bi-cup-hot-fill text-white text-[10px]"></i>
+              </div>
+              <span className="font-bold text-sm text-foreground">এডমিন প্যানেল</span>
+            </div>
+          </div>
+          <button
+            onClick={() => { sessionStorage.removeItem("admin-auth"); setAuthenticated(false); }}
+            className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center active:scale-95 transition-transform"
+            aria-label="লগআউট"
+          >
+            <i className="bi bi-box-arrow-right text-sm text-destructive"></i>
+          </button>
+        </div>
+
+        {/* Current Tab Title Bar */}
+        <div className="px-4 pb-2">
+          <span className="text-xs font-medium text-muted-foreground">
+            {tabs.find((t) => t.id === activeTab)?.label}
+          </span>
         </div>
       </div>
 
+      {/* Mobile Drawer */}
+      {mobileDrawerOpen && (
+        <>
+          <div
+            className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+            onClick={() => setMobileDrawerOpen(false)}
+          />
+          <div className="md:hidden fixed top-0 left-0 bottom-0 z-[70] w-72 bg-card border-r border-border shadow-2xl animate-slide-up-mobile-drawer">
+            <div className="p-4 border-b border-border flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold shrink-0">
+                <i className="bi bi-cup-hot-fill"></i>
+              </div>
+              <div>
+                <span className="font-bold text-sm text-foreground">ফ্রি ফুড ম্যাপ</span>
+                <p className="text-[10px] text-muted-foreground">এডমিন প্যানেল</p>
+              </div>
+              <button onClick={() => setMobileDrawerOpen(false)} className="ml-auto p-2 rounded-lg hover:bg-secondary">
+                <i className="bi bi-x-lg text-sm text-muted-foreground"></i>
+              </button>
+            </div>
+            <nav className="flex-1 p-3 space-y-1 overflow-auto custom-scrollbar">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/20"
+                      : "text-muted-foreground hover:bg-secondary active:scale-[0.98]"
+                  }`}
+                >
+                  <span className="text-lg w-6 text-center shrink-0">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+            <div className="p-3 border-t border-border space-y-1">
+              <a
+                href="/"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary transition-all"
+              >
+                <i className="bi bi-house-fill text-base"></i>
+                <span>ওয়েবসাইটে যান</span>
+              </a>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6 mt-14 md:mt-0 overflow-auto">
+      <main className="flex-1 p-4 md:p-6 pt-20 md:pt-6 overflow-auto">
         {loading ? (
           <div className="flex items-center justify-center h-64"><div className="spinner"></div></div>
         ) : (
@@ -294,7 +359,7 @@ export default function AdminPage() {
         )}
       </main>
 
-      {/* Edit Modal */}
+      {/* Edit Modal - Full screen on mobile */}
       {editModal && (
         <EditModal
           type={editModal.type}
@@ -326,8 +391,8 @@ export default function AdminPage() {
 
       {/* Delete Confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-card rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl animate-fade-in">
+        <div className="fixed inset-0 z-[3000] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-card rounded-t-2xl md:rounded-2xl p-6 w-full md:max-w-sm md:mx-4 shadow-xl animate-slide-up">
             <div className="text-center">
               <div className="text-4xl mb-3"><i className="bi bi-exclamation-triangle-fill text-destructive"></i></div>
               <h3 className="text-lg font-bold text-foreground mb-1">মুছে ফেলতে চান?</h3>
@@ -335,7 +400,7 @@ export default function AdminPage() {
                 &quot;{deleteConfirm.name}&quot; স্থায়ীভাবে মুছে যাবে।
               </p>
               <div className="flex gap-2">
-                <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors">
+                <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-3 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors min-h-[44px]">
                   বাতিল
                 </button>
                 <button
@@ -354,7 +419,7 @@ export default function AdminPage() {
                     setDeleteConfirm(null);
                     loadData();
                   }}
-                  className="flex-1 py-2 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:opacity-90 transition-colors"
+                  className="flex-1 py-3 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:opacity-90 transition-colors min-h-[44px]"
                 >
                   মুছুন
                 </button>
@@ -372,13 +437,13 @@ export default function AdminPage() {
 // ============================================
 function DashboardTab({ stats, spots, donations, reports, onSeedData }: { stats: AppStats | null; spots: Spot[]; donations: Donation[]; reports: Report[]; onSeedData: () => void }) {
   const cards = [
-    { label: "মোট স্পট", value: stats?.totalSpots || 0, icon: <i className="bi bi-geo-alt-fill text-xl"></i>, gradient: "from-blue-50 to-blue-100/50 border-blue-200/50", color: "bg-blue-500" },
-    { label: "নিশ্চিত স্পট", value: stats?.verifiedSpots || 0, icon: <i className="bi bi-patch-check-fill text-xl text-green-500"></i>, gradient: "from-green-50 to-green-100/50 border-green-200/50", color: "bg-green-500" },
-    { label: "সক্রিয় স্পট", value: stats?.activeSpots || 0, icon: <i className="bi bi-circle-fill text-xl text-emerald-500"></i>, gradient: "from-emerald-50 to-emerald-100/50 border-emerald-200/50", color: "bg-emerald-500" },
-    { label: "মোট ভিউ", value: stats?.totalViews || 0, icon: <i className="bi bi-eye text-xl text-purple-500"></i>, gradient: "from-purple-50 to-purple-100/50 border-purple-200/50", color: "bg-purple-500" },
-    { label: "রিভিউ", value: stats?.totalReviews || 0, icon: <i className="bi bi-star-fill text-xl text-amber-500"></i>, gradient: "from-amber-50 to-amber-100/50 border-amber-200/50", color: "bg-amber-500" },
-    { label: "অনুদান", value: donations.length, icon: <i className="bi bi-heart-fill text-xl text-pink-500"></i>, gradient: "from-pink-50 to-pink-100/50 border-pink-200/50", color: "bg-pink-500" },
-    { label: "রিপোর্ট", value: reports.filter((r) => r.status === "pending").length, icon: <i className="bi bi-exclamation-triangle-fill text-xl text-red-500"></i>, gradient: "from-red-50 to-red-100/50 border-red-200/50", color: "bg-red-500" },
+    { label: "মোট স্পট", value: stats?.totalSpots || 0, icon: <i className="bi bi-geo-alt-fill text-xl"></i>, gradient: "from-blue-50 to-blue-100/50 border-blue-200/50 dark:from-blue-900/30 dark:to-blue-800/20 dark:border-blue-800/50", color: "bg-blue-500" },
+    { label: "নিশ্চিত স্পট", value: stats?.verifiedSpots || 0, icon: <i className="bi bi-patch-check-fill text-xl text-green-500"></i>, gradient: "from-green-50 to-green-100/50 border-green-200/50 dark:from-green-900/30 dark:to-green-800/20 dark:border-green-800/50", color: "bg-green-500" },
+    { label: "সক্রিয় স্পট", value: stats?.activeSpots || 0, icon: <i className="bi bi-circle-fill text-xl text-emerald-500"></i>, gradient: "from-emerald-50 to-emerald-100/50 border-emerald-200/50 dark:from-emerald-900/30 dark:to-emerald-800/20 dark:border-emerald-800/50", color: "bg-emerald-500" },
+    { label: "মোট ভিউ", value: stats?.totalViews || 0, icon: <i className="bi bi-eye text-xl text-purple-500"></i>, gradient: "from-purple-50 to-purple-100/50 border-purple-200/50 dark:from-purple-900/30 dark:to-purple-800/20 dark:border-purple-800/50", color: "bg-purple-500" },
+    { label: "রিভিউ", value: stats?.totalReviews || 0, icon: <i className="bi bi-star-fill text-xl text-amber-500"></i>, gradient: "from-amber-50 to-amber-100/50 border-amber-200/50 dark:from-amber-900/30 dark:to-amber-800/20 dark:border-amber-800/50", color: "bg-amber-500" },
+    { label: "অনুদান", value: donations.length, icon: <i className="bi bi-heart-fill text-xl text-pink-500"></i>, gradient: "from-pink-50 to-pink-100/50 border-pink-200/50 dark:from-pink-900/30 dark:to-pink-800/20 dark:border-pink-800/50", color: "bg-pink-500" },
+    { label: "রিপোর্ট", value: reports.filter((r) => r.status === "pending").length, icon: <i className="bi bi-exclamation-triangle-fill text-xl text-red-500"></i>, gradient: "from-red-50 to-red-100/50 border-red-200/50 dark:from-red-900/30 dark:to-red-800/20 dark:border-red-800/50", color: "bg-red-500" },
   ];
 
   // City distribution
@@ -388,41 +453,41 @@ function DashboardTab({ stats, spots, donations, reports, onSeedData }: { stats:
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="text-xl font-bold text-foreground">ড্যাশবোর্ড</h2>
         {spots.length === 0 && (
-          <button onClick={onSeedData} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold hover:shadow-md transition-all">
-            <i className="bi bi-magic"></i> স্যাম্পল ডেটা যোগ করুন
+          <button onClick={onSeedData} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold hover:shadow-md transition-all whitespace-nowrap">
+            <i className="bi bi-magic"></i> স্যাম্পল ডেটা
           </button>
         )}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {cards.map((c) => (
-          <div key={c.label} className={`admin-card bg-gradient-to-br ${c.gradient} border rounded-xl p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200`}>
+          <div key={c.label} className={`admin-card bg-gradient-to-br ${c.gradient} border rounded-xl p-3 sm:p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-2xl">{c.icon}</span>
+              <span className="text-xl sm:text-2xl">{c.icon}</span>
               <span className={`w-2 h-2 rounded-full ${c.color}`}></span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{c.value.toLocaleString("bn-BD")}</p>
-            <p className="text-xs text-muted-foreground mt-1">{c.label}</p>
+            <p className="text-xl sm:text-2xl font-bold text-foreground">{c.value.toLocaleString("bn-BD")}</p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">{c.label}</p>
           </div>
         ))}
       </div>
 
       {/* City Distribution */}
-      <div className="bg-card rounded-xl p-5 border border-border">
+      <div className="bg-card rounded-xl p-4 sm:p-5 border border-border">
         <h3 className="text-sm font-bold text-foreground mb-4">শহর অনুযায়ী স্পট বিতরণ</h3>
         <div className="space-y-2">
           {cityData.map(([city, count]) => {
             const maxCount = cityData[0]?.[1] || 1;
             const pct = Math.round((count / maxCount) * 100);
             return (
-              <div key={city} className="flex items-center gap-3">
-                <span className="text-sm text-foreground w-24 truncate">{city || "অজানা"}</span>
-                <div className="flex-1 h-6 bg-secondary rounded-lg overflow-hidden">
+              <div key={city} className="flex items-center gap-2 sm:gap-3">
+                <span className="text-xs sm:text-sm text-foreground w-20 sm:w-24 truncate">{city || "অজানা"}</span>
+                <div className="flex-1 h-5 sm:h-6 bg-secondary rounded-lg overflow-hidden">
                   <div className="h-full bg-gradient-to-r from-emerald-500 to-green-500 rounded-lg transition-all" style={{ width: `${pct}%` }}></div>
                 </div>
-                <span className="text-sm font-bold text-foreground w-8 text-right">{count}</span>
+                <span className="text-xs sm:text-sm font-bold text-foreground w-6 sm:w-8 text-right">{count}</span>
               </div>
             );
           })}
@@ -431,7 +496,7 @@ function DashboardTab({ stats, spots, donations, reports, onSeedData }: { stats:
       </div>
 
       {/* Recent Spots */}
-      <div className="bg-card rounded-xl p-5 border border-border">
+      <div className="bg-card rounded-xl p-4 sm:p-5 border border-border">
         <h3 className="text-sm font-bold text-foreground mb-4">সাম্প্রতিক স্পট</h3>
         <div className="space-y-2">
           {spots.slice(0, 5).map((s) => (
@@ -493,48 +558,48 @@ function SpotsTab({ spots, onRefresh, onEdit, onDelete, onAdd, onVerify, onToggl
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="text-xl font-bold text-foreground">স্পট ম্যানেজমেন্ট</h2>
         <div className="flex gap-2">
-          <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors">
-            <i className="bi bi-arrow-clockwise text-xs"></i> রিফ্রেশ
+          <button onClick={onRefresh} className="px-3 py-2 rounded-lg bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors min-h-[44px]">
+            <i className="bi bi-arrow-clockwise text-xs"></i>
           </button>
-          <button onClick={() => setShowAddForm(!showAddForm)} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all">
-            {showAddForm ? "বন্ধ করুন" : "+ নতুন স্পট"}
+          <button onClick={() => setShowAddForm(!showAddForm)} className="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all whitespace-nowrap min-h-[44px]">
+            {showAddForm ? "বন্ধ" : "+ নতুন"}
           </button>
         </div>
       </div>
 
       {/* Add Spot Form */}
       {showAddForm && (
-        <form onSubmit={handleAddSubmit} className="bg-card rounded-xl p-5 border border-border space-y-3 animate-fade-in">
+        <form onSubmit={handleAddSubmit} className="bg-card rounded-xl p-4 sm:p-5 border border-border space-y-3 animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <input placeholder="স্থানের নাম *" value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} required
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <select value={addForm.type} onChange={(e) => setAddForm({ ...addForm, type: e.target.value as SpotType })}
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm">
               {Object.entries(SPOT_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
             </select>
             <input placeholder="এলাকা / মহল্লা *" value={addForm.area} onChange={(e) => setAddForm({ ...addForm, area: e.target.value })} required
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <input placeholder="শহর" value={addForm.city} onChange={(e) => setAddForm({ ...addForm, city: e.target.value })}
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <input placeholder="ঠিকানা" value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })}
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <input placeholder="নোটস" value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <input placeholder="অক্ষাংশ (lat)" value={addForm.lat} onChange={(e) => setAddForm({ ...addForm, lat: e.target.value })} type="number" step="any"
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <input placeholder="দ্রাঘিমাংশ (lng)" value={addForm.lng} onChange={(e) => setAddForm({ ...addForm, lng: e.target.value })} type="number" step="any"
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <input placeholder="খোলার সময়" value={addForm.openTime} onChange={(e) => setAddForm({ ...addForm, openTime: e.target.value })} type="time"
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
             <input placeholder="বন্ধের সময়" value={addForm.closeTime} onChange={(e) => setAddForm({ ...addForm, closeTime: e.target.value })} type="time"
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors">বাতিল</button>
-            <button type="submit" className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all">স্পট যোগ করুন</button>
+            <button type="button" onClick={() => setShowAddForm(false)} className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors min-h-[44px]">বাতিল</button>
+            <button type="submit" className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all min-h-[44px]">স্পট যোগ করুন</button>
           </div>
         </form>
       )}
@@ -544,7 +609,7 @@ function SpotsTab({ spots, onRefresh, onEdit, onDelete, onAdd, onVerify, onToggl
         <input
           type="text" placeholder="খুঁজুন..." value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-3 py-2 rounded-lg border border-border bg-card text-sm flex-1 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-primary/30"
+          className="px-3 py-2 rounded-lg border border-border bg-card text-sm flex-1 min-w-[140px] focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
         <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
           className="px-3 py-2 rounded-lg border border-border bg-card text-sm focus:outline-none">
@@ -559,15 +624,15 @@ function SpotsTab({ spots, onRefresh, onEdit, onDelete, onAdd, onVerify, onToggl
         </select>
       </div>
 
-      {/* Table */}
-      <div className="bg-card rounded-xl border border-border overflow-hidden">
+      {/* Desktop Table */}
+      <div className="bg-card rounded-xl border border-border overflow-hidden hidden md:block">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-secondary/30">
                 <th className="text-left px-4 py-3 font-semibold text-foreground">নাম</th>
-                <th className="text-left px-4 py-3 font-semibold text-foreground hidden md:table-cell">ধরন</th>
-                <th className="text-left px-4 py-3 font-semibold text-foreground hidden lg:table-cell">এলাকা</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">ধরন</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground">এলাকা</th>
                 <th className="text-center px-4 py-3 font-semibold text-foreground">অবস্থা</th>
                 <th className="text-center px-4 py-3 font-semibold text-foreground">ভোট</th>
                 <th className="text-right px-4 py-3 font-semibold text-foreground">অ্যাকশন</th>
@@ -580,12 +645,12 @@ function SpotsTab({ spots, onRefresh, onEdit, onDelete, onAdd, onVerify, onToggl
                     <div className="font-medium text-foreground truncate max-w-[200px]">{spot.name}</div>
                     <div className="text-xs text-muted-foreground truncate max-w-[200px]">{spot.address}</div>
                   </td>
-                  <td className="px-4 py-3 hidden md:table-cell">
+                  <td className="px-4 py-3">
                     <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-secondary">
                       {SPOT_TYPE_CONFIG[spot.type]?.emoji} {SPOT_TYPE_CONFIG[spot.type]?.label}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground hidden lg:table-cell">{spot.area || spot.city}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{spot.area || spot.city}</td>
                   <td className="px-4 py-3 text-center">
                     <div className="flex items-center justify-center gap-1">
                       <button
@@ -596,14 +661,14 @@ function SpotsTab({ spots, onRefresh, onEdit, onDelete, onAdd, onVerify, onToggl
                       </button>
                       <button
                         onClick={() => onToggleActive(spot.id, !spot.active)}
-                        className={`px-2 py-0.5 rounded-full text-xs font-bold ${spot.active ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-600"}`}
+                        className={`px-2 py-0.5 rounded-full text-xs font-bold ${spot.active ? "bg-blue-500 text-white" : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300"}`}
                       >
                         {spot.active ? "সক্রিয়" : "নিষ্ক্রিয়"}
                       </button>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className="text-green-600"><i className="bi bi-hand-thumbs-up text-[10px]"></i>{spot.positiveVotes}</span>
+                    <span className="text-green-600 dark:text-green-400"><i className="bi bi-hand-thumbs-up text-[10px]"></i>{spot.positiveVotes}</span>
                     {" / "}
                     <span className="text-red-500"><i className="bi bi-hand-thumbs-down text-[10px]"></i>{spot.negativeVotes}</span>
                   </td>
@@ -622,6 +687,46 @@ function SpotsTab({ spots, onRefresh, onEdit, onDelete, onAdd, onVerify, onToggl
           )}
         </div>
       </div>
+
+      {/* Mobile Cards */}
+      <div className="space-y-3 md:hidden">
+        {filtered.map((spot) => (
+          <div key={spot.id} className="bg-card rounded-xl p-4 border border-border">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xl shrink-0">{SPOT_TYPE_CONFIG[spot.type]?.emoji || <i className="bi bi-cup-hot text-xl"></i>}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-foreground truncate">{spot.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{spot.area || spot.city}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button onClick={() => onEdit(spot)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-secondary"><i className="bi bi-pencil text-sm"></i></button>
+                <button onClick={() => onDelete(spot)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-sm text-destructive"></i></button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-secondary">
+                {SPOT_TYPE_CONFIG[spot.type]?.label}
+              </span>
+              <button onClick={() => onVerify(spot.id, !spot.verified)} className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${spot.verified ? "bg-green-500 text-white" : "bg-secondary text-muted-foreground"}`}>
+                {spot.verified ? "✓ নিশ্চিত" : "? অনিশ্চিত"}
+              </button>
+              <button onClick={() => onToggleActive(spot.id, !spot.active)} className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${spot.active ? "bg-blue-500 text-white" : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-300"}`}>
+                {spot.active ? "সক্রিয়" : "নিষ্ক্রিয়"}
+              </button>
+            </div>
+            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+              <span className="text-green-600 dark:text-green-400">👍 {spot.positiveVotes}</span>
+              <span className="text-red-500">👎 {spot.negativeVotes}</span>
+            </div>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground text-sm">কোন স্পট পাওয়া যায়নি</div>
+        )}
+      </div>
+
       <p className="text-xs text-muted-foreground">মোট {filtered.length} / {spots.length} স্পট</p>
     </div>
   );
@@ -648,49 +753,49 @@ function EventsTab({ events, onRefresh, onEdit, onDelete, onAdd }: {
   const statusLabel = (s: string) =>
     s === "upcoming" ? "আসন্ন" : s === "ongoing" ? "চলমান" : s === "completed" ? "সম্পন্ন" : "বাতিল";
   const statusColor = (s: string) =>
-    s === "upcoming" ? "bg-blue-500/10 text-blue-600" :
-    s === "ongoing" ? "bg-green-500/10 text-green-600" :
+    s === "upcoming" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+    s === "ongoing" ? "bg-green-500/10 text-green-600 dark:text-green-400" :
     s === "completed" ? "bg-gray-500/10 text-gray-500" :
-    "bg-red-500/10 text-red-600";
+    "bg-red-500/10 text-red-600 dark:text-red-400";
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="text-xl font-bold text-foreground">ইভেন্ট ম্যানেজমেন্ট</h2>
         <div className="flex gap-2">
-          <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium"><i className="bi bi-arrow-clockwise text-xs"></i></button>
-          <button onClick={() => setShowForm(!showForm)} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all">
-            {showForm ? "বন্ধ করুন" : "+ নতুন ইভেন্ট"}
+          <button onClick={onRefresh} className="px-3 py-2 rounded-lg bg-secondary text-sm font-medium min-h-[44px]"><i className="bi bi-arrow-clockwise text-xs"></i></button>
+          <button onClick={() => setShowForm(!showForm)} className="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all whitespace-nowrap min-h-[44px]">
+            {showForm ? "বন্ধ" : "+ নতুন"}
           </button>
         </div>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-card rounded-xl p-5 border border-border space-y-3 animate-fade-in">
+        <form onSubmit={handleSubmit} className="bg-card rounded-xl p-4 sm:p-5 border border-border space-y-3 animate-fade-in">
           <input placeholder="ইভেন্টের নাম *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <textarea placeholder="বিবরণ" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <div className="grid grid-cols-2 gap-3">
             <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
             <input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })}
-              className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
           </div>
           <input placeholder="লোকেশন" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <input placeholder="আয়োজক" value={form.organizer} onChange={(e) => setForm({ ...form, organizer: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <input placeholder="খাবারের ধরন" value={form.foodType} onChange={(e) => setForm({ ...form, foodType: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm">
             <option value="upcoming">আসন্ন</option>
             <option value="ongoing">চলমান</option>
             <option value="completed">সম্পন্ন</option>
             <option value="cancelled">বাতিল</option>
           </select>
-          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all">ইভেন্ট তৈরি করুন</button>
+          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all min-h-[44px]">ইভেন্ট তৈরি করুন</button>
         </form>
       )}
 
@@ -708,8 +813,8 @@ function EventsTab({ events, onRefresh, onEdit, onDelete, onAdd }: {
               <p className="text-xs text-muted-foreground">{event.organizer}</p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
-              <button onClick={() => onEdit(event)} className="p-1.5 rounded-lg hover:bg-secondary"><i className="bi bi-pencil text-xs"></i></button>
-              <button onClick={() => onDelete(event)} className="p-1.5 rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-xs"></i></button>
+              <button onClick={() => onEdit(event)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-secondary"><i className="bi bi-pencil text-sm"></i></button>
+              <button onClick={() => onDelete(event)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-sm text-destructive"></i></button>
             </div>
           </div>
         ))}
@@ -740,27 +845,27 @@ function DonationsTab({ donations, onRefresh, onDelete, onAdd, onUpdateStatus }:
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <div>
           <h2 className="text-xl font-bold text-foreground">অনুদান</h2>
           <p className="text-sm text-muted-foreground">মোট: ৳{totalAmount.toLocaleString("bn-BD")} ({donations.length} জন দাতা)</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium"><i className="bi bi-arrow-clockwise text-xs"></i></button>
-          <button onClick={() => setShowForm(!showForm)} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold hover:shadow-md transition-all">
-            {showForm ? "বন্ধ করুন" : "+ অনুদান যোগ করুন"}
+          <button onClick={onRefresh} className="px-3 py-2 rounded-lg bg-secondary text-sm font-medium min-h-[44px]"><i className="bi bi-arrow-clockwise text-xs"></i></button>
+          <button onClick={() => setShowForm(!showForm)} className="px-3 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold hover:shadow-md transition-all whitespace-nowrap min-h-[44px]">
+            {showForm ? "বন্ধ" : "+ নতুন"}
           </button>
         </div>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-card rounded-xl p-5 border border-border space-y-3 animate-fade-in">
+        <form onSubmit={handleSubmit} className="bg-card rounded-xl p-4 sm:p-5 border border-border space-y-3 animate-fade-in">
           <input placeholder="দাতার নাম *" value={form.donorName} onChange={(e) => setForm({ ...form, donorName: e.target.value })} required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <input type="number" placeholder="পরিমাণ (৳) *" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <select value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm">
             <option value="bKash">bKash</option>
             <option value="Nagad">Nagad</option>
             <option value="Rocket">Rocket</option>
@@ -768,8 +873,8 @@ function DonationsTab({ donations, onRefresh, onDelete, onAdd, onUpdateStatus }:
             <option value="Cash">নগদ</option>
           </select>
           <textarea placeholder="বার্তা" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={2}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-sm hover:shadow-md transition-all">সংরক্ষণ করুন</button>
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-sm hover:shadow-md transition-all min-h-[44px]">সংরক্ষণ করুন</button>
         </form>
       )}
 
@@ -779,7 +884,7 @@ function DonationsTab({ donations, onRefresh, onDelete, onAdd, onUpdateStatus }:
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-bold text-foreground">{d.donorName}</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-600">৳{d.amount.toLocaleString("bn-BD")}</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/10 text-green-600 dark:text-green-400">৳{d.amount.toLocaleString("bn-BD")}</span>
                 <span className="text-xs text-muted-foreground">({d.method})</span>
               </div>
               {d.message && <p className="text-xs text-muted-foreground mt-1">{d.message}</p>}
@@ -787,9 +892,9 @@ function DonationsTab({ donations, onRefresh, onDelete, onAdd, onUpdateStatus }:
             </div>
             <div className="flex items-center gap-1 shrink-0">
               {d.status === "pending" && (
-                <button onClick={() => onUpdateStatus(d.id, "confirmed")} className="p-1.5 rounded-lg hover:bg-green-50" title="নিশ্চিত করুন"><i className="bi bi-check-circle text-xs text-green-500"></i></button>
+                <button onClick={() => onUpdateStatus(d.id, "confirmed")} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-green-50 dark:hover:bg-green-900/30" title="নিশ্চিত করুন"><i className="bi bi-check-circle text-sm text-green-500"></i></button>
               )}
-              <button onClick={() => onDelete(d)} className="p-1.5 rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-xs"></i></button>
+              <button onClick={() => onDelete(d)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-sm text-destructive"></i></button>
             </div>
           </div>
         ))}
@@ -819,29 +924,29 @@ function TeamTab({ team, onRefresh, onEdit, onDelete, onAdd }: {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="text-xl font-bold text-foreground">টিম সদস্য</h2>
         <div className="flex gap-2">
-          <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium"><i className="bi bi-arrow-clockwise text-xs"></i></button>
-          <button onClick={() => setShowForm(!showForm)} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all">
-            {showForm ? "বন্ধ করুন" : "+ নতুন সদস্য"}
+          <button onClick={onRefresh} className="px-3 py-2 rounded-lg bg-secondary text-sm font-medium min-h-[44px]"><i className="bi bi-arrow-clockwise text-xs"></i></button>
+          <button onClick={() => setShowForm(!showForm)} className="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all whitespace-nowrap min-h-[44px]">
+            {showForm ? "বন্ধ" : "+ নতুন"}
           </button>
         </div>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-card rounded-xl p-5 border border-border space-y-3 animate-fade-in">
+        <form onSubmit={handleSubmit} className="bg-card rounded-xl p-4 sm:p-5 border border-border space-y-3 animate-fade-in">
           <input placeholder="নাম *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <input placeholder="ভূমিকা *" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <textarea placeholder="বায়ো" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm resize-none" />
           <input placeholder="Facebook URL" value={form.facebook} onChange={(e) => setForm({ ...form, facebook: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
           <input placeholder="ফোন" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
-          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all">সদস্য যোগ করুন</button>
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
+          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all min-h-[44px]">সদস্য যোগ করুন</button>
         </form>
       )}
 
@@ -849,7 +954,7 @@ function TeamTab({ team, onRefresh, onEdit, onDelete, onAdd }: {
         {team.map((member) => (
           <div key={member.id} className="bg-card rounded-xl p-4 border border-border hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
             <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-lg overflow-hidden shrink-0">
                   {(member.avatar && member.avatar.startsWith("http")) ? (
                     <img src={member.avatar} alt="" className="w-full h-full rounded-full object-cover" />
@@ -857,15 +962,15 @@ function TeamTab({ team, onRefresh, onEdit, onDelete, onAdd }: {
                     member.name.charAt(0)
                   )}
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">{member.name}</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-foreground truncate">{member.name}</p>
                   <p className="text-xs text-muted-foreground">{member.role}</p>
                   {member.phone && <p className="text-xs text-muted-foreground mt-0.5"><i className="bi bi-telephone text-xs"></i> {member.phone}</p>}
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button onClick={() => onEdit(member)} className="p-1.5 rounded-lg hover:bg-secondary"><i className="bi bi-pencil text-xs"></i></button>
-                <button onClick={() => onDelete(member)} className="p-1.5 rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-xs"></i></button>
+              <div className="flex items-center gap-1 shrink-0">
+                <button onClick={() => onEdit(member)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-secondary"><i className="bi bi-pencil text-sm"></i></button>
+                <button onClick={() => onDelete(member)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-sm text-destructive"></i></button>
               </div>
             </div>
           </div>
@@ -896,28 +1001,28 @@ function ReportsTab({ reports, onRefresh, onUpdate, onDelete, onAdd }: {
   };
 
   const statusLabel = (s: string) => s === "pending" ? "অপেক্ষমান" : s === "reviewing" ? "পর্যালোচনা" : s === "resolved" ? "সমাধান" : "বাতিল";
-  const statusColor = (s: string) => s === "pending" ? "bg-amber-500/10 text-amber-600" : s === "reviewing" ? "bg-blue-500/10 text-blue-600" : s === "resolved" ? "bg-green-500/10 text-green-600" : "bg-gray-500/10 text-gray-500";
+  const statusColor = (s: string) => s === "pending" ? "bg-amber-500/10 text-amber-600 dark:text-amber-400" : s === "reviewing" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : s === "resolved" ? "bg-green-500/10 text-green-600 dark:text-green-400" : "bg-gray-500/10 text-gray-500";
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h2 className="text-xl font-bold text-foreground">রিপোর্ট</h2>
         <div className="flex gap-2">
-          <button onClick={onRefresh} className="px-3 py-1.5 rounded-lg bg-secondary text-sm font-medium"><i className="bi bi-arrow-clockwise text-xs"></i> রিফ্রেশ</button>
-          <button onClick={() => setShowForm(!showForm)} className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all">
-            {showForm ? "বন্ধ করুন" : "+ নতুন রিপোর্ট"}
+          <button onClick={onRefresh} className="px-3 py-2 rounded-lg bg-secondary text-sm font-medium min-h-[44px]"><i className="bi bi-arrow-clockwise text-xs"></i> রিফ্রেশ</button>
+          <button onClick={() => setShowForm(!showForm)} className="px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold hover:shadow-md transition-all whitespace-nowrap min-h-[44px]">
+            {showForm ? "বন্ধ" : "+ নতুন"}
           </button>
         </div>
       </div>
 
       {showForm && (
-        <form onSubmit={handleAddSubmit} className="bg-card rounded-xl p-5 border border-border space-y-3 animate-fade-in">
+        <form onSubmit={handleAddSubmit} className="bg-card rounded-xl p-4 sm:p-5 border border-border space-y-3 animate-fade-in">
           <input placeholder="স্পটের নাম *" value={form.spotName} onChange={(e) => setForm({ ...form, spotName: e.target.value })} required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <input placeholder="স্পট ID" value={form.spotId} onChange={(e) => setForm({ ...form, spotId: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm">
             <option value="incorrect_info">ভুল তথ্য</option>
             <option value="closed">স্থান বন্ধ</option>
             <option value="inappropriate">অনুপযুক্ত বিষয়বস্তু</option>
@@ -925,39 +1030,41 @@ function ReportsTab({ reports, onRefresh, onUpdate, onDelete, onAdd }: {
             <option value="other">অন্যান্য</option>
           </select>
           <textarea placeholder="বিবরণ *" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <input placeholder="রিপোর্টারের নাম" value={form.reporterName} onChange={(e) => setForm({ ...form, reporterName: e.target.value })}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
-          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all">রিপোর্ট যোগ করুন</button>
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
+          <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all min-h-[44px]">রিপোর্ট যোগ করুন</button>
         </form>
       )}
 
       <div className="space-y-2">
         {reports.map((r) => (
-          <div key={r.id} className="bg-card rounded-xl p-4 border border-border flex items-center justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-bold text-foreground">{r.spotName}</span>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${statusColor(r.status)}`}>{statusLabel(r.status)}</span>
+          <div key={r.id} className="bg-card rounded-xl p-4 border border-border">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-bold text-foreground">{r.spotName}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${statusColor(r.status)}`}>{statusLabel(r.status)}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{r.description}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">{new Date(r.createdAt).toLocaleDateString("bn-BD")}</p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">{r.description}</p>
-              <p className="text-[10px] text-muted-foreground mt-1">{new Date(r.createdAt).toLocaleDateString("bn-BD")}</p>
-            </div>
-            <div className="flex items-center gap-1 shrink-0">
-              {r.status === "pending" && (
-                <>
-                  <button onClick={() => onUpdate(r.id, "reviewing")} className="p-1.5 rounded-lg hover:bg-blue-50" title="পর্যালোচনা"><i className="bi bi-eye text-xs text-blue-500"></i></button>
-                  <button onClick={() => onUpdate(r.id, "resolved")} className="p-1.5 rounded-lg hover:bg-green-50" title="সমাধান"><i className="bi bi-check-circle text-xs text-green-500"></i></button>
-                  <button onClick={() => onUpdate(r.id, "dismissed")} className="p-1.5 rounded-lg hover:bg-gray-100" title="বাতিল"><i className="bi bi-x-circle text-xs text-gray-400"></i></button>
-                </>
-              )}
-              {r.status === "reviewing" && (
-                <>
-                  <button onClick={() => onUpdate(r.id, "resolved")} className="p-1.5 rounded-lg hover:bg-green-50" title="সমাধান"><i className="bi bi-check-circle text-xs text-green-500"></i></button>
-                  <button onClick={() => onUpdate(r.id, "dismissed")} className="p-1.5 rounded-lg hover:bg-gray-100" title="বাতিল"><i className="bi bi-x-circle text-xs text-gray-400"></i></button>
-                </>
-              )}
-              <button onClick={() => onDelete(r)} className="p-1.5 rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-xs"></i></button>
+              <div className="flex items-center gap-1 shrink-0">
+                {r.status === "pending" && (
+                  <>
+                    <button onClick={() => onUpdate(r.id, "reviewing")} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30" title="পর্যালোচনা"><i className="bi bi-eye text-sm text-blue-500"></i></button>
+                    <button onClick={() => onUpdate(r.id, "resolved")} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-green-50 dark:hover:bg-green-900/30" title="সমাধান"><i className="bi bi-check-circle text-sm text-green-500"></i></button>
+                    <button onClick={() => onUpdate(r.id, "dismissed")} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" title="বাতিল"><i className="bi bi-x-circle text-sm text-gray-400"></i></button>
+                  </>
+                )}
+                {r.status === "reviewing" && (
+                  <>
+                    <button onClick={() => onUpdate(r.id, "resolved")} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-green-50 dark:hover:bg-green-900/30" title="সমাধান"><i className="bi bi-check-circle text-sm text-green-500"></i></button>
+                    <button onClick={() => onUpdate(r.id, "dismissed")} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" title="বাতিল"><i className="bi bi-x-circle text-sm text-gray-400"></i></button>
+                  </>
+                )}
+                <button onClick={() => onDelete(r)} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-destructive/10"><i className="bi bi-trash3 text-sm text-destructive"></i></button>
+              </div>
             </div>
           </div>
         ))}
@@ -991,28 +1098,28 @@ function SettingsTab({ settings, onSave, onExportCSV, onExportJSON }: {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-foreground">সেটিংস</h2>
-      <form onSubmit={handleSubmit} className="bg-card rounded-xl p-5 border border-border space-y-3">
+      <form onSubmit={handleSubmit} className="bg-card rounded-xl p-4 sm:p-5 border border-border space-y-3">
         <input placeholder="যোগাযোগ ইমেইল" value={form.contactEmail} onChange={(e) => setForm({ ...form, contactEmail: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         <input placeholder="যোগাযোগ ফোন" value={form.contactPhone} onChange={(e) => setForm({ ...form, contactPhone: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         <input placeholder="Facebook URL" value={form.facebookUrl} onChange={(e) => setForm({ ...form, facebookUrl: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         <div className="flex items-center gap-2">
           <input type="checkbox" id="maintenance" checked={form.maintenanceMode} onChange={(e) => setForm({ ...form, maintenanceMode: e.target.checked })} className="rounded" />
           <label htmlFor="maintenance" className="text-sm text-foreground">মেইনটেন্যান্স মোড</label>
         </div>
-        <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all">সংরক্ষণ করুন</button>
+        <button type="submit" className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all min-h-[44px]">সংরক্ষণ করুন</button>
       </form>
 
-      <div className="bg-card rounded-xl p-5 border border-border space-y-3">
+      <div className="bg-card rounded-xl p-4 sm:p-5 border border-border space-y-3">
         <h3 className="text-sm font-bold text-foreground">এক্সপোর্ট</h3>
         <div className="flex gap-2">
-          <button onClick={onExportCSV} className="flex-1 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors">
-            <i className="bi bi-filetype-csv text-xs"></i> CSV এক্সপোর্ট
+          <button onClick={onExportCSV} className="flex-1 px-3 py-2.5 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors min-h-[44px]">
+            <i className="bi bi-filetype-csv text-xs"></i> CSV
           </button>
-          <button onClick={onExportJSON} className="flex-1 px-3 py-2 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors">
-            <i className="bi bi-filetype-json text-xs"></i> JSON এক্সপোর্ট
+          <button onClick={onExportJSON} className="flex-1 px-3 py-2.5 rounded-xl bg-secondary text-sm font-medium hover:bg-secondary/80 transition-colors min-h-[44px]">
+            <i className="bi bi-filetype-json text-xs"></i> JSON
           </button>
         </div>
       </div>
@@ -1021,7 +1128,7 @@ function SettingsTab({ settings, onSave, onExportCSV, onExportJSON }: {
 }
 
 // ============================================
-// EDIT MODAL
+// EDIT MODAL - Full screen on mobile
 // ============================================
 function EditModal({ type, data, onClose, onSave }: {
   type: string; data: any; onClose: () => void;
@@ -1043,36 +1150,36 @@ function EditModal({ type, data, onClose, onSave }: {
   };
 
   return (
-    <div className="fixed inset-0 z-[3000] flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-card rounded-2xl p-6 max-w-lg w-full mx-4 shadow-xl animate-fade-in max-h-[80vh] overflow-y-auto custom-scrollbar">
-        <div className="flex items-center justify-between mb-4">
+    <div className="fixed inset-0 z-[3000] flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-card rounded-t-2xl md:rounded-2xl w-full md:max-w-lg md:mx-4 shadow-xl animate-slide-up max-h-[90vh] md:max-h-[80vh] overflow-y-auto custom-scrollbar">
+        <div className="sticky top-0 bg-card z-10 flex items-center justify-between p-4 pb-3 border-b border-border">
           <h3 className="text-lg font-bold text-foreground">
             {type === "spot" ? "স্পট সম্পাদনা" : type === "event" ? "ইভেন্ট সম্পাদনা" : "সদস্য সম্পাদনা"}
           </h3>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-secondary"><i className="bi bi-x-lg"></i></button>
+          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-secondary"><i className="bi bi-x-lg"></i></button>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="p-4 pt-3 space-y-3">
           {type === "spot" && (
             <>
-              <input placeholder="নাম *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <input placeholder="শহর" value={form.city || ""} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <input placeholder="এলাকা" value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+              <input placeholder="নাম *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input placeholder="শহর" value={form.city || ""} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input placeholder="এলাকা" value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm">
                 {Object.entries(SPOT_TYPE_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.emoji} {v.label}</option>)}
               </select>
-              <textarea placeholder="ঠিকানা" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <input placeholder="নোটস" value={form.notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value || null })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <textarea placeholder="ঠিকানা" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} rows={2} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input placeholder="নোটস" value={form.notes || ""} onChange={(e) => setForm({ ...form, notes: e.target.value || null })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </>
           )}
           {type === "event" && (
             <>
-              <input placeholder="শিরোনাম *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <textarea placeholder="বিবরণ" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <input placeholder="লোকেশন" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
-              <input type="time" value={form.time || ""} onChange={(e) => setForm({ ...form, time: e.target.value })} className="px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
-              <input placeholder="আয়োজক" value={form.organizer || ""} onChange={(e) => setForm({ ...form, organizer: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <select value={form.status || "upcoming"} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm">
+              <input placeholder="শিরোনাম *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <textarea placeholder="বিবরণ" value={form.description || ""} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input placeholder="লোকেশন" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input type="time" value={form.time || ""} onChange={(e) => setForm({ ...form, time: e.target.value })} className="px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input placeholder="আয়োজক" value={form.organizer || ""} onChange={(e) => setForm({ ...form, organizer: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <select value={form.status || "upcoming"} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm">
                 <option value="upcoming">আসন্ন</option>
                 <option value="ongoing">চলমান</option>
                 <option value="completed">সম্পন্ন</option>
@@ -1082,17 +1189,17 @@ function EditModal({ type, data, onClose, onSave }: {
           )}
           {type === "team" && (
             <>
-              <input placeholder="নাম *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <input placeholder="ভূমিকা *" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} required className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
-              <textarea placeholder="বায়ো" value={form.bio || ""} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm resize-none" />
-              <input placeholder="Facebook URL" value={form.social?.facebook || ""} onChange={(e) => setForm({ ...form, social: { ...form.social, facebook: e.target.value } })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
-              <input placeholder="ইমেইল" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
-              <input placeholder="ফোন" value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input placeholder="নাম *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input placeholder="ভূমিকা *" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} required className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <textarea placeholder="বায়ো" value={form.bio || ""} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm resize-none" />
+              <input placeholder="Facebook URL" value={form.social?.facebook || ""} onChange={(e) => setForm({ ...form, social: { ...form.social, facebook: e.target.value } })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input placeholder="ইমেইল" value={form.email || ""} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
+              <input placeholder="ফোন" value={form.phone || ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-border bg-secondary/30 text-sm" />
             </>
           )}
-          <div className="flex gap-2 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors">বাতিল</button>
-            <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all disabled:opacity-50">
+          <div className="flex gap-2 pt-2 pb-safe">
+            <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-secondary transition-colors min-h-[44px]">বাতিল</button>
+            <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm hover:shadow-md transition-all disabled:opacity-50 min-h-[44px]">
               {saving ? "সংরক্ষণ হচ্ছে..." : "সংরক্ষণ করুন"}
             </button>
           </div>
