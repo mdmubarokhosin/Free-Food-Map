@@ -139,13 +139,13 @@ export default function HomePage() {
           {/* Search */}
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"></i>
+              <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-white text-sm"></i>
               <input
                 type="text"
                 placeholder="এলাকা বা স্পট খুঁজুন..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border-0 shadow-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 border-0 shadow-lg text-sm text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
               />
             </div>
           </div>
