@@ -10,6 +10,8 @@ interface NavbarProps {
   onSearchChange?: (value: string) => void;
   totalSpots?: number;
   verifiedSpots?: number;
+  /** When true, renders a clean non-map navbar (used on /events, /status, /donate, etc.) */
+  compact?: boolean;
 }
 
 export default function Navbar({
@@ -18,6 +20,7 @@ export default function Navbar({
   onSearchChange = () => {},
   totalSpots = 0,
   verifiedSpots = 0,
+  compact = false,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -42,6 +45,127 @@ export default function Navbar({
     return String(n).replace(/[0-9]/g, (c) => d[parseInt(c)]);
   }
 
+  // Compact mode: simple navbar for non-map pages
+  if (compact) {
+    return (
+      <>
+        <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+          <div className="container mx-auto px-3 sm:px-4 py-3">
+            <div className="flex items-center justify-between">
+              {/* Logo */}
+              <Link href="/" className="flex items-center gap-2">
+                <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center">
+                  <span className="text-lg">🍽️</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold leading-none text-emerald-700 dark:text-emerald-400">ফ্রি ফুড</span>
+                  <span className="text-xs font-bold leading-none text-emerald-600 dark:text-emerald-500">ম্যাপ</span>
+                </div>
+              </Link>
+
+              {/* Desktop nav */}
+              <nav className="hidden md:flex items-center gap-1">
+                <Link href="/" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <i className="bi bi-house text-xs mr-1"></i>
+                  হোম
+                </Link>
+                <Link href="/events" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <i className="bi bi-calendar3 text-xs mr-1"></i>
+                  ইভেন্ট
+                </Link>
+                <Link href="/donate" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <i className="bi bi-heart text-xs mr-1"></i>
+                  দান করুন
+                </Link>
+                <Link href="/status" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <i className="bi bi-info-circle text-xs mr-1"></i>
+                  তথ্য
+                </Link>
+                <Link href="/admin" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <i className="bi bi-gear text-xs mr-1"></i>
+                  এডমিন
+                </Link>
+              </nav>
+
+              {/* Mobile menu toggle */}
+              <div className="md:hidden flex items-center gap-2">
+                <span className="text-xs font-bold px-2 py-1 rounded-full bg-gradient-to-r from-emerald-600 to-green-500 text-white">
+                  {toBn(totalSpots)} স্পট
+                </span>
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors"
+                >
+                  {mobileMenuOpen ? (
+                    <i className="bi bi-x-lg text-sm text-emerald-600" />
+                  ) : (
+                    <i className="bi bi-list text-sm text-emerald-600" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <>
+            <div
+              className="fixed inset-0 bg-black/20 z-[1002] md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <div
+              ref={menuRef}
+              className="fixed top-14 right-3 z-[1003] w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden md:hidden"
+            >
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition-colors"
+              >
+                <i className="bi bi-house text-emerald-600"></i>
+                <span className="text-sm font-medium">হোম</span>
+              </Link>
+              <Link
+                href="/events"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition-colors"
+              >
+                <i className="bi bi-calendar3 text-emerald-600"></i>
+                <span className="text-sm font-medium">ইভেন্ট</span>
+              </Link>
+              <Link
+                href="/donate"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors"
+              >
+                <i className="bi bi-heart text-red-500"></i>
+                <span className="text-sm font-medium text-red-600">দান করুন</span>
+              </Link>
+              <Link
+                href="/status"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition-colors"
+              >
+                <i className="bi bi-info-circle text-emerald-600"></i>
+                <span className="text-sm font-medium">তথ্য</span>
+              </Link>
+              <Link
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors"
+              >
+                <i className="bi bi-gear text-gray-500"></i>
+                <span className="text-sm font-medium">এডমিন</span>
+              </Link>
+            </div>
+          </>
+        )}
+      </>
+    );
+  }
+
+  // Full map mode navbar (original)
   return (
     <>
       {/* Floating Header */}

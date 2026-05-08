@@ -5,7 +5,7 @@
  */
 import { ref, get, push, set, remove, update } from 'firebase/database';
 import { database } from '@/lib/firebase';
-import { Spot, SpotType, Review, ComprehensiveStatus, ServiceStatus, StatusCheck, UptimeData, ResponseTimeData, SSLCertificate } from '@/types';
+import { Spot, SpotType, Review } from '@/types';
 
 // ============================================================================
 // Internal Helper Functions (not exported)
@@ -794,23 +794,65 @@ const SAMPLE_EVENTS: Omit<Event, 'id' | 'createdAt' | 'updatedAt'>[] = [
 ];
 
 function transformFirebaseEvent(fbEvent: Record<string, unknown>): Event {
+  // Detect format: FoodEvent (admin) uses 'title', services.ts uses 'name'
+  const name = (fbEvent.name || fbEvent.title || '') as string;
+
+  // Handle time fields: services.ts has startTime/endTime, FoodEvent has 'time'
+  let startTime = (fbEvent.startTime || '00:00') as string;
+  let endTime = (fbEvent.endTime || '23:59') as string;
+  if (!fbEvent.startTime && fbEvent.time) {
+    const timeStr = String(fbEvent.time);
+    // Parse time like "10:00 AM - 2:00 PM" or simple "10:00"
+    if (timeStr.includes('-')) {
+      const parts = timeStr.split('-').map((s: string) => s.trim());
+      startTime = parts[0] || '00:00';
+      endTime = parts[1] || '23:59';
+    } else {
+      startTime = timeStr;
+      endTime = '23:59';
+    }
+  }
+
+  // Handle area/city: services.ts has area, FoodEvent has address
+  const area = (fbEvent.area || fbEvent.address || '') as string;
+
+  // Derive city from address if not directly available
+  let city = (fbEvent.city || '') as string;
+  if (!city && fbEvent.address) {
+    const addr = String(fbEvent.address);
+    // Try to extract city from address (last part before comma or the whole address)
+    const parts = addr.split(',').map((s: string) => s.trim());
+    if (parts.length > 1) {
+      city = parts[parts.length - 1];
+    } else {
+      city = addr;
+    }
+  }
+
+  // Handle expected attendees: services.ts uses expectedAttendees, FoodEvent uses estimatedPeople
+  const expectedAttendees = fbEvent.expectedAttendees
+    ? Number(fbEvent.expectedAttendees)
+    : fbEvent.estimatedPeople
+    ? Number(fbEvent.estimatedPeople)
+    : undefined;
+
   return {
     id: fbEvent.id as string,
-    name: (fbEvent.name || '') as string,
+    name,
     type: (fbEvent.type || 'special_distribution') as EventType,
     description: (fbEvent.description || '') as string,
     date: (fbEvent.date || '') as string,
-    startTime: (fbEvent.startTime || '00:00') as string,
-    endTime: (fbEvent.endTime || '23:59') as string,
+    startTime,
+    endTime,
     location: (fbEvent.location || '') as string,
-    area: (fbEvent.area || '') as string,
-    city: (fbEvent.city || '') as string,
+    area,
+    city,
     lat: fbEvent.lat ? parseFloat(String(fbEvent.lat)) : undefined,
     lng: fbEvent.lng ? parseFloat(String(fbEvent.lng)) : undefined,
     spotId: fbEvent.spotId as string | undefined,
     organizer: (fbEvent.organizer || '') as string,
     contactPhone: fbEvent.contactPhone as string | undefined,
-    expectedAttendees: fbEvent.expectedAttendees ? Number(fbEvent.expectedAttendees) : undefined,
+    expectedAttendees,
     isActive: fbEvent.isActive !== false,
     createdAt: Number(fbEvent.createdAt) || Date.now(),
     updatedAt: Number(fbEvent.updatedAt) || Date.now(),
@@ -869,10 +911,13 @@ export async function getEvents(params?: {
     let events: Event[] = [];
 
     for (const key in eventsData) {
-      if (eventsData[key].isActive !== false) {
-        const event = transformFirebaseEvent({ id: key, ...eventsData[key] });
-        events.push(event);
-      }
+      const raw = eventsData[key];
+      // Skip cancelled events (FoodEvent format uses status field)
+      if (raw.status === 'cancelled') continue;
+      // Skip if explicitly inactive
+      if (raw.isActive === false) continue;
+      const event = transformFirebaseEvent({ id: key, ...raw });
+      events.push(event);
     }
 
     if (type !== 'all') {
@@ -2230,123 +2275,32 @@ export async function editSpot(spotId: string, data: Record<string, unknown>): P
 }
 
 // ============================================================================
-// 12. STATUS SERVICE
+// 12. STATUS SERVICE (Real Firebase Data)
 // ============================================================================
 
-function generateUptimeHistory(): UptimeData[] {
-  const data: UptimeData[] = [];
-  const now = new Date();
-
-  for (let i = 13; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
-
-    const uptime = 99 + Math.random();
-    const totalChecks = 288;
-    const successfulChecks = Math.floor(totalChecks * (uptime / 100));
-
-    data.push({
-      date: dateStr,
-      uptime: Math.min(100, uptime),
-      totalChecks,
-      successfulChecks,
-    });
-  }
-
-  return data;
+export interface RealSystemStats {
+  totalSpots: number;
+  verifiedSpots: number;
+  activeSpots: number;
+  newSpots: number;
+  totalViews: number;
+  totalReviews: number;
+  totalEvents: number;
+  activeEvents: number;
+  totalReports: number;
+  pendingReports: number;
+  cityDistribution: { city: string; count: number }[];
+  spotTypeDistribution: { type: string; count: number }[];
+  lastUpdated: string;
 }
 
-function generateResponseTimeHistory(): ResponseTimeData[] {
-  const data: ResponseTimeData[] = [];
-  const now = new Date();
-
-  for (let i = 23; i >= 0; i--) {
-    const hour = new Date(now);
-    hour.setHours(hour.getHours() - i);
-
-    for (let j = 0; j < 4; j++) {
-      const timestamp = new Date(hour);
-      timestamp.setMinutes(j * 15);
-
-      let responseTime = 200 + Math.random() * 300;
-
-      if (timestamp.getHours() >= 6 && timestamp.getHours() <= 8) {
-        responseTime += Math.random() * 500;
-      }
-      if (timestamp.getHours() >= 18 && timestamp.getHours() <= 20) {
-        responseTime += Math.random() * 400;
-      }
-
-      data.push({
-        timestamp: timestamp.toISOString(),
-        responseTime: Math.floor(responseTime),
-      });
-    }
-  }
-
-  return data;
-}
-
-function generateRecentChecks(): StatusCheck[] {
-  const checks: StatusCheck[] = [];
-  const now = new Date();
-
-  for (let i = 0; i < 6; i++) {
-    const timestamp = new Date(now);
-    timestamp.setMinutes(timestamp.getMinutes() - i * 30);
-
-    checks.push({
-      id: `check-${i}`,
-      timestamp: timestamp.toISOString(),
-      responseTime: Math.floor(150 + Math.random() * 400),
-      status: Math.random() > 0.05 ? 'ok' : 'timeout',
-      statusCode: Math.random() > 0.05 ? 200 : 503,
-    });
-  }
-
-  return checks;
-}
-
-function getServices(): ServiceStatus[] {
-  return [
-    { name: 'Database', status: 'operational', responseTime: 67, lastCheck: new Date().toISOString(), uptime: 99.98 },
-    { name: 'API Server', status: 'operational', responseTime: 125, lastCheck: new Date().toISOString(), uptime: 99.95 },
-    { name: 'Auth Service', status: 'operational', responseTime: 89, lastCheck: new Date().toISOString(), uptime: 99.99 },
-    { name: 'Map Service', status: 'operational', responseTime: 234, lastCheck: new Date().toISOString(), uptime: 99.92 },
-    { name: 'Storage', status: 'operational', responseTime: 156, lastCheck: new Date().toISOString(), uptime: 99.97 },
-    { name: 'CDN', status: 'operational', responseTime: 45, lastCheck: new Date().toISOString(), uptime: 99.99 },
-    { name: 'Cache', status: 'operational', responseTime: 23, lastCheck: new Date().toISOString(), uptime: 99.99 },
-    { name: 'Background Jobs', status: 'operational', responseTime: 312, lastCheck: new Date().toISOString(), uptime: 99.85 },
-    { name: 'Notifications', status: 'operational', responseTime: 178, lastCheck: new Date().toISOString(), uptime: 99.90 },
-  ];
-}
-
-function getSSLCertificate(): SSLCertificate {
-  const now = new Date();
-  const validFrom = new Date(now);
-  validFrom.setMonth(validFrom.getMonth() - 6);
-  const validTo = new Date(now);
-  validTo.setMonth(validTo.getMonth() + 6);
-
-  return {
-    valid: true,
-    hostname: 'freefoodmap.pages.dev',
-    issuer: 'Cloudflare Inc',
-    protocol: 'TLS 1.3',
-    validFrom: validFrom.toISOString(),
-    validTo: validTo.toISOString(),
-    lastChecked: now.toISOString(),
-  };
-}
-
-export async function getSystemStatus(): Promise<{
+export async function getRealSystemStats(): Promise<{
   success: boolean;
-  status?: ComprehensiveStatus;
+  stats?: RealSystemStats;
   error?: string;
 }> {
   try {
-    // Get app stats from Firebase
+    // Get spots
     const spotsRef = ref(database, 'spots');
     const spotsSnapshot = await get(spotsRef);
 
@@ -2355,30 +2309,26 @@ export async function getSystemStatus(): Promise<{
     let activeSpots = 0;
     let newSpots = 0;
     let totalViews = 0;
+    const cityMap: Record<string, number> = {};
+    const typeMap: Record<string, number> = {};
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
     if (spotsSnapshot.exists()) {
       const spotsData = spotsSnapshot.val();
-      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
       for (const key in spotsData) {
         const spot = spotsData[key];
         totalSpots++;
 
-        if (spot.verified === true) {
-          verifiedSpots++;
-        }
+        if (spot.verified === true) verifiedSpots++;
+        if (spot.active !== false) activeSpots++;
+        if (spot.createdAt && spot.createdAt >= sevenDaysAgo) newSpots++;
+        if (spot.viewCount) totalViews += spot.viewCount;
 
-        if (spot.active !== false) {
-          activeSpots++;
-        }
+        const city = String(spot.city || 'অজানা').trim();
+        cityMap[city] = (cityMap[city] || 0) + 1;
 
-        if (spot.createdAt && spot.createdAt >= sevenDaysAgo) {
-          newSpots++;
-        }
-
-        if (spot.viewCount) {
-          totalViews += spot.viewCount;
-        }
+        const type = String(spot.type || 'other').trim();
+        typeMap[type] = (typeMap[type] || 0) + 1;
       }
     }
 
@@ -2386,84 +2336,73 @@ export async function getSystemStatus(): Promise<{
     let totalReviews = 0;
     const reviewsRef = ref(database, 'reviews');
     const reviewsSnapshot = await get(reviewsRef);
-
     if (reviewsSnapshot.exists()) {
       const reviewsData = reviewsSnapshot.val();
       for (const spotId in reviewsData) {
-        const spotReviews = reviewsData[spotId];
-        for (const reviewId in spotReviews) {
+        for (const reviewId in reviewsData[spotId]) {
           totalReviews++;
         }
       }
     }
 
-    // Get stored analytics
-    const analyticsRef = ref(database, 'analytics');
-    const analyticsSnapshot = await get(analyticsRef);
-
-    if (analyticsSnapshot.exists()) {
-      const analyticsData = analyticsSnapshot.val();
-      if (analyticsData.totalViews) {
-        totalViews = Math.max(totalViews, analyticsData.totalViews);
+    // Get events count
+    let totalEvents = 0;
+    let activeEvents = 0;
+    const eventsRef = ref(database, 'events');
+    const eventsSnapshot = await get(eventsRef);
+    if (eventsSnapshot.exists()) {
+      const eventsData = eventsSnapshot.val();
+      for (const key in eventsData) {
+        totalEvents++;
+        if (eventsData[key].status !== 'cancelled' && eventsData[key].status !== 'completed') {
+          activeEvents++;
+        }
       }
     }
 
-    // Generate monitoring data
-    const services = getServices();
-    const uptimeHistory = generateUptimeHistory();
-    const responseTimeHistory = generateResponseTimeHistory();
-    const recentChecks = generateRecentChecks();
-    const ssl = getSSLCertificate();
-
-    // Calculate overall metrics
-    const avgResponseTime = Math.floor(
-      services.reduce((sum, s) => sum + s.responseTime, 0) / services.length
-    );
-    const uptime =
-      uptimeHistory.reduce((sum, d) => sum + d.uptime, 0) / uptimeHistory.length;
-    const totalChecks = uptimeHistory.reduce((sum, d) => sum + d.totalChecks, 0);
-
-    // Determine overall system status
-    let systemStatus: 'operational' | 'degraded' | 'partial_outage' | 'major_outage' =
-      'operational';
-    const downServices = services.filter((s) => s.status === 'down').length;
-    const degradedServices = services.filter((s) => s.status === 'degraded').length;
-
-    if (downServices > 0) {
-      systemStatus = downServices >= 3 ? 'major_outage' : 'partial_outage';
-    } else if (degradedServices > 0) {
-      systemStatus = 'degraded';
+    // Get reports count
+    let totalReports = 0;
+    let pendingReports = 0;
+    const reportsRef = ref(database, 'reports');
+    const reportsSnapshot = await get(reportsRef);
+    if (reportsSnapshot.exists()) {
+      const reportsData = reportsSnapshot.val();
+      for (const key in reportsData) {
+        totalReports++;
+        if (reportsData[key].status === 'pending') pendingReports++;
+      }
     }
 
-    const comprehensiveStatus: ComprehensiveStatus = {
-      systemStatus,
-      lastCheck: new Date().toISOString(),
-      uptime: Math.round(uptime * 100) / 100,
-      avgResponseTime,
-      totalChecks,
-      services,
-      uptimeHistory,
-      responseTimeHistory,
-      recentChecks,
-      incidents: [],
-      ssl,
-      appStats: {
+    // Sort distributions
+    const cityDistribution = Object.entries(cityMap)
+      .map(([city, count]) => ({ city, count }))
+      .sort((a, b) => b.count - a.count);
+
+    const spotTypeDistribution = Object.entries(typeMap)
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count);
+
+    return {
+      success: true,
+      stats: {
         totalSpots,
         verifiedSpots,
         activeSpots,
         newSpots,
         totalViews,
         totalReviews,
+        totalEvents,
+        activeEvents,
+        totalReports,
+        pendingReports,
+        cityDistribution,
+        spotTypeDistribution,
+        lastUpdated: new Date().toISOString(),
       },
     };
-
-    return {
-      success: true,
-      status: comprehensiveStatus,
-    };
   } catch (error) {
-    console.error('Error fetching status:', error);
-    return { success: false, error: 'স্ট্যাটাস লোড করতে সমস্যা হয়েছে' };
+    console.error('Error fetching system stats:', error);
+    return { success: false, error: 'পরিসংখ্যান লোড করতে সমস্যা হয়েছে' };
   }
 }
 

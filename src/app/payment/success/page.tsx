@@ -15,7 +15,7 @@ function PaymentSuccessContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 to-background dark:from-gray-900 dark:to-gray-800">
-      <Navbar onAddSpot={() => {}} />
+      <Navbar onAddSpot={() => {}} compact />
       
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <Card className="w-full max-w-md border-0 shadow-xl">
@@ -46,7 +46,7 @@ function PaymentSuccessContent() {
         </Card>
       </main>
       
-      <Footer />
+      <Footer standard />
     </div>
   );
 }

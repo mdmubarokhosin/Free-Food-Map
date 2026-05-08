@@ -167,7 +167,7 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-green-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <Navbar onAddSpot={() => {}} />
+      <Navbar onAddSpot={() => {}} compact />
 
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-6 max-w-6xl">
         {/* Header */}
@@ -415,7 +415,7 @@ export default function EventsPage() {
         </Card>
       </main>
 
-      <Footer />
+      <Footer standard />
 
       {/* Custom Scrollbar Styles */}
       <style jsx global>{`

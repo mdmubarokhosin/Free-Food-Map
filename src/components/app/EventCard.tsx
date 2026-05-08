@@ -170,10 +170,11 @@ export default function EventCard({ event, className }: EventCardProps) {
   };
 
   const getShareText = (): string => {
+    const locationStr = [event.location, event.area, event.city].filter(Boolean).join(', ');
     return `🎉 ইভেন্ট: ${event.name}
 📅 তারিখ: ${formatDateBn(event.date)}
 ⏰ সময়: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}
-📍 স্থান: ${event.location}, ${event.area}, ${event.city}
+📍 স্থান: ${locationStr}
 🔗 ${getEventUrl()}`;
   };
 
@@ -284,7 +285,7 @@ export default function EventCard({ event, className }: EventCardProps) {
             <div className="flex items-center gap-2 text-sm">
               <i className="bi bi-geo-alt text-red-600 dark:text-red-400 text-sm shrink-0"></i>
               <span className="text-muted-foreground truncate">
-                {event.location}, {event.area}, {event.city}
+                {event.location}{event.area && event.area !== event.location ? `, ${event.area}` : ''}{event.city && event.city !== event.area ? `, ${event.city}` : ''}
               </span>
             </div>
 
