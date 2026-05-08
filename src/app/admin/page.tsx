@@ -115,14 +115,14 @@ export default function AdminPage() {
   }
 
   // Admin Dashboard
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "dashboard", label: "ড্যাশবোর্ড", icon: <i className="bi bi-grid-1x2-fill"></i> },
-    { id: "spots", label: "স্পট ম্যানেজমেন্ট", icon: <i className="bi bi-geo-alt-fill"></i> },
-    { id: "events", label: "ইভেন্ট", icon: <i className="bi bi-calendar-event"></i> },
-    { id: "donations", label: "অনুদান", icon: <i className="bi bi-heart-fill"></i> },
-    { id: "team", label: "টিম", icon: <i className="bi bi-people-fill"></i> },
-    { id: "reports", label: "রিপোর্ট", icon: <i className="bi bi-exclamation-triangle-fill"></i> },
-    { id: "settings", label: "সেটিংস", icon: <i className="bi bi-gear-fill"></i> },
+  const tabs: { id: Tab; label: string; desc: string; icon: React.ReactNode; gradient: string; dot: string }[] = [
+    { id: "dashboard", label: "ড্যাশবোর্ড", desc: "সামগ্রিক তথ্য", icon: <i className="bi bi-grid-1x2-fill"></i>, gradient: "from-blue-500 to-cyan-500", dot: "bg-blue-400" },
+    { id: "spots", label: "স্পট ম্যানেজমেন্ট", desc: "ফ্রি ফুড স্পট", icon: <i className="bi bi-geo-alt-fill"></i>, gradient: "from-emerald-500 to-green-500", dot: "bg-emerald-400" },
+    { id: "events", label: "ইভেন্ট", desc: "ফুড ইভেন্ট", icon: <i className="bi bi-calendar-event"></i>, gradient: "from-purple-500 to-violet-500", dot: "bg-purple-400" },
+    { id: "donations", label: "অনুদান", desc: "দাতা তালিকা", icon: <i className="bi bi-heart-fill"></i>, gradient: "from-pink-500 to-rose-500", dot: "bg-pink-400" },
+    { id: "team", label: "টিম", desc: "সদস্য পরিচালনা", icon: <i className="bi bi-people-fill"></i>, gradient: "from-amber-500 to-orange-500", dot: "bg-amber-400" },
+    { id: "reports", label: "রিপোর্ট", desc: "সমস্যা রিপোর্ট", icon: <i className="bi bi-exclamation-triangle-fill"></i>, gradient: "from-red-500 to-orange-500", dot: "bg-red-400" },
+    { id: "settings", label: "সেটিংস", desc: "সাইট কনফিগারেশন", icon: <i className="bi bi-gear-fill"></i>, gradient: "from-slate-500 to-gray-500", dot: "bg-slate-400" },
   ];
 
   const handleTabChange = (tabId: Tab) => {
@@ -153,127 +153,196 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Desktop Sidebar */}
-      <aside className={`admin-sidebar bg-card border-r border-border flex-col ${sidebarOpen ? "w-60" : "w-16"} transition-all duration-300 shrink-0 hidden md:flex`}>
-        <div className="p-4 border-b border-border flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm shrink-0">
-            <i className="bi bi-cup-hot-fill text-xs"></i>
+      <aside className={`admin-sidebar bg-card border-r border-border flex-col ${sidebarOpen ? "w-64" : "w-[68px]"} transition-all duration-300 shrink-0 hidden md:flex overflow-hidden`}>
+        <div className={`p-4 border-b border-border flex items-center gap-3 ${sidebarOpen ? "" : "justify-center"}`}>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center text-white font-bold shrink-0 shadow-lg shadow-orange-200/50 dark:shadow-orange-900/30">
+            <i className="bi bi-cup-hot-fill text-base"></i>
           </div>
-          {sidebarOpen && <span className="font-bold text-sm text-foreground truncate">এডমিন প্যানেল</span>}
+          {sidebarOpen && (
+            <div className="min-w-0">
+              <span className="font-bold text-sm text-foreground block truncate">ফ্রি ফুড ম্যাপ</span>
+              <span className="text-[10px] text-muted-foreground">এডমিন কন্ট্রোল প্যানেল</span>
+            </div>
+          )}
         </div>
-        <nav className="flex-1 p-2 space-y-1 overflow-auto custom-scrollbar">
+
+        <nav className="flex-1 p-2.5 space-y-1 overflow-auto custom-scrollbar">
+          <p className={`text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-3 py-1.5 ${sidebarOpen ? "" : "hidden"}`}>মেনু</p>
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative ${
                 activeTab === tab.id
-                  ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg dark:shadow-emerald-900/40"
-                  : "text-muted-foreground hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+                  ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg dark:shadow-black/20`
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
+              title={!sidebarOpen ? tab.label : undefined}
             >
-              <span className="text-base shrink-0">{tab.icon}</span>
-              {sidebarOpen && <span className="truncate">{tab.label}</span>}
+              {activeTab === tab.id && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-white/60" />
+              )}
+              <span className={`text-base shrink-0 w-6 text-center ${activeTab !== tab.id ? "group-hover:scale-110 transition-transform" : ""}`}>{tab.icon}</span>
+              {sidebarOpen && (
+                <div className="flex-1 text-left min-w-0">
+                  <span className="block truncate text-[13px]">{tab.label}</span>
+                  <span className={`block truncate text-[10px] ${activeTab === tab.id ? "text-white/70" : "text-muted-foreground/70"}`}>{tab.desc}</span>
+                </div>
+              )}
             </button>
           ))}
         </nav>
-        <div className="p-2 border-t border-border">
+
+        <div className="p-2.5 border-t border-border space-y-1">
           <button
             onClick={() => { sessionStorage.removeItem("admin-auth"); setAuthenticated(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-all group ${sidebarOpen ? "" : "justify-center"}`}
+            title={!sidebarOpen ? "লগআউট" : undefined}
           >
-            <i className="bi bi-box-arrow-right"></i>
+            <span className="text-base shrink-0 group-hover:scale-110 transition-transform"><i className="bi bi-box-arrow-right"></i></span>
             {sidebarOpen && <span>লগআউট</span>}
           </button>
           <a
             href="/"
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary transition-all"
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary transition-all group ${sidebarOpen ? "" : "justify-center"}`}
+            title={!sidebarOpen ? "ওয়েবসাইটে যান" : undefined}
           >
-            <i className="bi bi-house-fill"></i>
+            <span className="text-base shrink-0 group-hover:scale-110 transition-transform"><i className="bi bi-house-fill"></i></span>
             {sidebarOpen && <span>ওয়েবসাইটে যান</span>}
           </a>
         </div>
       </aside>
 
-      {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
-              className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center active:scale-95 transition-transform"
-              aria-label="মেনু"
-            >
-              <i className={`bi ${mobileDrawerOpen ? "bi-x-lg" : "bi-list"} text-lg text-foreground`}></i>
-            </button>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50">
+        <div className="bg-card/95 backdrop-blur-xl border-b border-border">
+          <div className="flex items-center justify-between px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center">
-                <i className="bi bi-cup-hot-fill text-white text-[10px]"></i>
+              <button
+                onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center active:scale-95 transition-transform shadow-md shadow-emerald-200/50 dark:shadow-emerald-900/30"
+                aria-label="মেনু"
+              >
+                <i className={`bi ${mobileDrawerOpen ? "bi-x-lg" : "bi-list"} text-base text-white`}></i>
+              </button>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center shadow-sm">
+                  <i className="bi bi-cup-hot-fill text-white text-xs"></i>
+                </div>
+                <div>
+                  <span className="font-bold text-[13px] text-foreground block leading-tight">এডমিন প্যানেল</span>
+                  <span className="text-[10px] text-muted-foreground block leading-tight">
+                    {tabs.find((t) => t.id === activeTab)?.label}
+                  </span>
+                </div>
               </div>
-              <span className="font-bold text-sm text-foreground">এডমিন প্যানেল</span>
             </div>
+            <button
+              onClick={() => { sessionStorage.removeItem("admin-auth"); setAuthenticated(false); }}
+              className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center active:scale-95 transition-transform border border-destructive/20"
+              aria-label="লগআউট"
+            >
+              <i className="bi bi-box-arrow-right text-sm text-destructive"></i>
+            </button>
           </div>
-          <button
-            onClick={() => { sessionStorage.removeItem("admin-auth"); setAuthenticated(false); }}
-            className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center active:scale-95 transition-transform"
-            aria-label="লগআউট"
-          >
-            <i className="bi bi-box-arrow-right text-sm text-destructive"></i>
-          </button>
-        </div>
-
-        {/* Current Tab Title Bar */}
-        <div className="px-4 pb-2">
-          <span className="text-xs font-medium text-muted-foreground">
-            {tabs.find((t) => t.id === activeTab)?.label}
-          </span>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
       {mobileDrawerOpen && (
         <>
           <div
-            className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
             onClick={() => setMobileDrawerOpen(false)}
           />
-          <div className="md:hidden fixed top-0 left-0 bottom-0 z-[70] w-72 bg-card border-r border-border shadow-2xl animate-slide-up-mobile-drawer">
-            <div className="p-4 border-b border-border flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold shrink-0">
-                <i className="bi bi-cup-hot-fill"></i>
+          <div className="md:hidden fixed top-0 left-0 bottom-0 z-[70] w-[300px] max-w-[85vw] bg-card shadow-2xl animate-slide-up-mobile-drawer flex flex-col">
+            <div className="relative p-5 pb-6 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 overflow-hidden">
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-20 h-20 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
               </div>
-              <div>
-                <span className="font-bold text-sm text-foreground">ফ্রি ফুড ম্যাপ</span>
-                <p className="text-[10px] text-muted-foreground">এডমিন প্যানেল</p>
+
+              <div className="relative flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white shadow-lg border border-white/30">
+                    <i className="bi bi-cup-hot-fill text-xl"></i>
+                  </div>
+                  <div>
+                    <span className="font-bold text-sm text-white block">ফ্রি ফুড ম্যাপ</span>
+                    <p className="text-[11px] text-white/60">এডমিন কন্ট্রোল প্যানেল</p>
+                  </div>
+                </div>
+                <button onClick={() => setMobileDrawerOpen(false)} className="w-8 h-8 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center active:scale-95 transition-transform">
+                  <i className="bi bi-x-lg text-sm text-white"></i>
+                </button>
               </div>
-              <button onClick={() => setMobileDrawerOpen(false)} className="ml-auto p-2 rounded-lg hover:bg-secondary">
-                <i className="bi bi-x-lg text-sm text-muted-foreground"></i>
-              </button>
+
+              <div className="relative mt-4 flex items-center gap-2">
+                <div className="flex-1 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/10">
+                  <p className="text-[10px] text-white/60">স্পট</p>
+                  <p className="text-sm font-bold text-white">{spots.length}</p>
+                </div>
+                <div className="flex-1 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/10">
+                  <p className="text-[10px] text-white/60">ভিউ</p>
+                  <p className="text-sm font-bold text-white">{(stats?.totalViews || 0).toLocaleString("bn-BD")}</p>
+                </div>
+                <div className="flex-1 bg-white/15 backdrop-blur-sm rounded-lg px-3 py-2 border border-white/10">
+                  <p className="text-[10px] text-white/60">দাতা</p>
+                  <p className="text-sm font-bold text-white">{donations.length}</p>
+                </div>
+              </div>
             </div>
+
             <nav className="flex-1 p-3 space-y-1 overflow-auto custom-scrollbar">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-3 py-2">নেভিগেশন</p>
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.98] ${
                     activeTab === tab.id
-                      ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/20"
-                      : "text-muted-foreground hover:bg-secondary active:scale-[0.98]"
+                      ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg dark:shadow-black/20 relative overflow-hidden`
+                      : "text-muted-foreground hover:bg-secondary"
                   }`}
                 >
-                  <span className="text-lg w-6 text-center shrink-0">{tab.icon}</span>
-                  <span>{tab.label}</span>
+                  {activeTab === tab.id && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-white/60" />
+                  )}
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 ${
+                    activeTab === tab.id
+                      ? "bg-white/20"
+                      : "bg-secondary"
+                  }`}>
+                    {tab.icon}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <span className="block text-[13px] font-semibold">{tab.label}</span>
+                    <span className={`block text-[10px] ${activeTab === tab.id ? "text-white/70" : "text-muted-foreground/70"}`}>{tab.desc}</span>
+                  </div>
+                  {activeTab === tab.id && (
+                    <i className="bi bi-chevron-left text-white/50 text-xs" />
+                  )}
                 </button>
               ))}
             </nav>
+
             <div className="p-3 border-t border-border space-y-1">
               <a
                 href="/"
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary transition-all"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary transition-all active:scale-[0.98]"
               >
-                <i className="bi bi-house-fill text-base"></i>
-                <span>ওয়েবসাইটে যান</span>
+                <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-sm shrink-0">
+                  <i className="bi bi-house-fill"></i>
+                </div>
+                <span className="text-[13px]">ওয়েবসাইটে যান</span>
               </a>
+              <button
+                onClick={() => { setMobileDrawerOpen(false); sessionStorage.removeItem("admin-auth"); setAuthenticated(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-all active:scale-[0.98]"
+              >
+                <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center text-sm shrink-0">
+                  <i className="bi bi-box-arrow-right"></i>
+                </div>
+                <span className="text-[13px]">লগআউট</span>
+              </button>
             </div>
           </div>
         </>
