@@ -112,7 +112,7 @@ export default function StatusPage() {
   }, [stats]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-teal-50/40 via-[#FAFAF9] to-white dark:from-[#111111] dark:to-stone-900">
       <Navbar onAddSpot={() => {}} compact />
 
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-6 max-w-6xl">
@@ -120,8 +120,8 @@ export default function StatusPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                <i className="bi bi-bar-chart text-2xl text-green-600 dark:text-green-400"></i>
+              <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900/30 dark:to-emerald-900/30 rounded-xl shadow-sm">
+                <i className="bi bi-bar-chart text-2xl text-teal-600 dark:text-teal-400"></i>
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
@@ -155,7 +155,7 @@ export default function StatusPage() {
           <div className="space-y-6">
             {/* Key Metrics Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+              <Card className="bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200/50 dark:border-teal-800/30 shadow-sm">
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-2 mb-1">
                     <i className="bi bi-geo-alt text-green-600 text-sm"></i>
@@ -167,7 +167,7 @@ export default function StatusPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+              <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200/50 dark:border-emerald-800/30 shadow-sm">
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-2 mb-1">
                     <i className="bi bi-check-circle text-emerald-600 text-sm"></i>
@@ -179,7 +179,7 @@ export default function StatusPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200">
+              <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200/50 dark:border-amber-800/30 shadow-sm">
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-2 mb-1">
                     <i className="bi bi-lightning text-amber-600 text-sm"></i>
@@ -191,7 +191,7 @@ export default function StatusPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-blue-50 to-sky-50 border-blue-200">
+              <Card className="bg-gradient-to-br from-sky-50 to-cyan-50 border-sky-200/50 dark:border-sky-800/30 shadow-sm">
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-2 mb-1">
                     <i className="bi bi-star text-blue-600 text-sm"></i>
@@ -203,7 +203,7 @@ export default function StatusPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-50 to-fuchsia-50 border-purple-200">
+              <Card className="bg-gradient-to-br from-purple-50 to-fuchsia-50 border-purple-200/50 dark:border-purple-800/30 shadow-sm">
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-2 mb-1">
                     <i className="bi bi-calendar-event text-purple-600 text-sm"></i>

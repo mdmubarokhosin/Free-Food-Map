@@ -84,16 +84,16 @@ export default function AdminPage() {
   // Login Screen
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-stone-950 via-teal-950 to-stone-950 flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-orange-500/30">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-xl shadow-orange-500/25 ring-4 ring-white/5">
               <i className="bi bi-shield-lock-fill text-white text-3xl"></i>
             </div>
             <h1 className="text-2xl font-bold text-white">এডমিন প্যানেল</h1>
             <p className="text-sm text-white/60 mt-1">ফ্রি ফুড ম্যাপ</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+          <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.06] rounded-2xl p-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <input
                 type="password"

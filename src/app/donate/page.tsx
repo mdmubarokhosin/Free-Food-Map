@@ -45,7 +45,7 @@ export default function DonatePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 text-white py-12 px-4 text-center">
+      <div className="bg-gradient-to-br from-teal-700 via-emerald-600 to-teal-600 text-white py-12 px-4 text-center relative overflow-hidden">
         <h1 className="text-3xl font-bold mb-2"><i className="bi bi-heart-fill"></i> অনুদান করুন</h1>
         <p className="text-white/80 max-w-md mx-auto">
           দরিদ্রদের জন্য বিনামূল্যে খাবার বিতরণে আমাদের সাথে যুক্ত হন। আপনার একটু সাহায্যে কারো অন্ন হতে পারে।
@@ -74,7 +74,7 @@ export default function DonatePage() {
           <h2 className="text-xl font-bold text-foreground mb-4">অনুদানের স্তর</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {tiers.map((tier) => (
-              <div key={tier.name} className={`relative bg-card rounded-2xl p-5 border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${tier.popular ? "border-2 border-orange-400 shadow-lg shadow-orange-100" : "border-border"}`}>
+              <div key={tier.name} className={`relative bg-card rounded-2xl p-5 border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${tier.popular ? "border-2 border-orange-400 shadow-lg shadow-orange-100/50 ring-1 ring-orange-200/30" : "border-stone-200/60 dark:border-stone-700/40"}`}>
                 {tier.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold">
                     <i className="bi bi-star-fill text-[10px]"></i> জনপ্রিয়
@@ -102,7 +102,7 @@ export default function DonatePage() {
           <h2 className="text-xl font-bold text-foreground mb-4">পেমেন্ট পদ্ধতি</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {paymentMethods.map((pm) => (
-              <div key={pm.name} className="bg-card rounded-xl p-4 border border-border flex items-center justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+              <div key={pm.name} className="bg-card rounded-xl p-4 border border-stone-200/60 dark:border-stone-700/40 flex items-center justify-between hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
                 <div className="flex items-center gap-3">
                   {pm.icon}
                   <div>
@@ -127,7 +127,7 @@ export default function DonatePage() {
             <h2 className="text-xl font-bold text-foreground mb-4">সাম্প্রতিক দাতাগণ</h2>
             <div className="space-y-2">
               {donations.slice(0, 10).map((d) => (
-                <div key={d.id} className="bg-card rounded-xl p-3 border border-border flex items-center justify-between hover:shadow-md transition-all duration-200">
+                <div key={d.id} className="bg-card rounded-xl p-3 border border-stone-200/60 dark:border-stone-700/40 flex items-center justify-between hover:shadow-md transition-all duration-300">
                   <div>
                     <p className="text-sm font-medium text-foreground">{d.donorName}</p>
                     <p className="text-xs text-muted-foreground">{d.method} • {new Date(d.createdAt).toLocaleDateString("bn-BD")}</p>
@@ -148,7 +148,7 @@ export default function DonatePage() {
               { q: "আমি কি রসিদ পাব?", a: "হ্যাঁ, অনুদানের পর আপনি একটি ইমেইল রসিদ পাবেন।" },
               { q: "ট্রান্সপারেন্সি কীভাবে নিশ্চিত করা হয়?", a: "আমরা নিয়মিত আর্থিক রিপোর্ট প্রকাশ করি এবং প্রতিটি অনুদানের ব্যবহার ট্র্যাক করি।" },
             ].map((item, i) => (
-              <div key={i} className="bg-card rounded-xl p-4 border border-border hover:shadow-md transition-all duration-200">
+              <div key={i} className="bg-card rounded-xl p-4 border border-stone-200/60 dark:border-stone-700/40 hover:shadow-md transition-all duration-300">
                 <h4 className="text-sm font-bold text-foreground flex items-center gap-2"><i className="bi bi-question-circle text-orange-500"></i> {item.q}</h4>
                 <p className="text-sm text-muted-foreground mt-1">{item.a}</p>
               </div>

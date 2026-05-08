@@ -214,8 +214,8 @@ export default function EventCard({ event, className }: EventCardProps) {
         className={cn(
           'transition-all duration-300 hover:shadow-lg rounded-xl border',
           upcoming
-            ? 'border-green-100 dark:border-green-700 bg-white dark:bg-gray-800'
-            : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 opacity-75',
+            ? 'border-teal-100/60 dark:border-teal-800/30 bg-white dark:bg-stone-800/80'
+            : 'border-stone-200/60 dark:border-stone-700/40 bg-stone-50/50 dark:bg-stone-800/30 opacity-75',
           className
         )}
       >
@@ -301,7 +301,7 @@ export default function EventCard({ event, className }: EventCardProps) {
 
             {/* Organizer */}
             <div className="flex items-center gap-2 text-sm">
-              <div className="h-4 w-4 shrink-0 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+              <div className="h-4 w-4 shrink-0 rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 flex items-center justify-center">
                 <span className="text-[8px] text-white font-bold">অ</span>
               </div>
               <span className="text-muted-foreground">

@@ -123,7 +123,7 @@ export default function BottomSheet({
       onTouchMove={handleTouchMove}
     >
       {/* Decorative top gradient border */}
-      <div className="h-1 w-full bg-gradient-to-r from-teal-500 via-teal-400 to-teal-300 rounded-t-2xl" />
+      <div className="h-1.5 w-full bg-gradient-to-r from-teal-600 via-emerald-500 to-amber-400 rounded-t-2xl" />
 
       {/* Handle */}
       <div className="flex justify-center pt-1.5 pb-0.5 cursor-pointer" onClick={onToggleExpand}>
@@ -131,17 +131,17 @@ export default function BottomSheet({
       </div>
 
       {/* Header - Beautiful gradient */}
-      <div className="mx-3 mb-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-teal-600 via-teal-700 to-teal-800 shadow-lg shadow-teal-200/50 dark:shadow-teal-900/30">
+      <div className="mx-3 mb-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-teal-700 via-teal-800 to-emerald-900 shadow-lg shadow-teal-200/40 dark:shadow-teal-900/30 ring-1 ring-white/10" >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Spots Icon */}
-            <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/10">
               <i className="bi bi-map text-white text-base"></i>
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-white">স্পট সমূহ</h2>
-                <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold backdrop-blur-sm">
+                <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white text-[10px] font-bold backdrop-blur-sm ring-1 ring-white/10">
                   {toBn(spots.length)}
                 </span>
               </div>
@@ -154,7 +154,7 @@ export default function BottomSheet({
             {/* Add Spot Button */}
             <button
               onClick={onAddClick}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-teal-700 text-xs font-bold hover:bg-white/90 active:scale-95 transition-all shadow-md"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-teal-800 text-xs font-bold hover:bg-white/90 active:scale-95 transition-all shadow-md ring-1 ring-white/20"
             >
               <i className="bi bi-plus-lg text-sm"></i>
               <span className="hidden sm:inline">নতুন স্পট</span>
@@ -162,7 +162,7 @@ export default function BottomSheet({
             {/* Expand/Collapse */}
             <button
               onClick={onToggleExpand}
-              className="w-8 h-8 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 transition-transform"
+              className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 transition-transform ring-1 ring-white/10"
             >
               <i className={`bi bi-chevron-up text-sm transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}></i>
             </button>
@@ -194,34 +194,36 @@ export default function BottomSheet({
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-10">
             <div className="relative mb-3">
-              <div className="spinner"></div>
-              <i className="bi bi-cup-hot absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-accent text-xs"></i>
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900/30 dark:to-emerald-900/30 flex items-center justify-center shadow-md animate-float">
+                <i className="bi bi-cup-hot text-teal-500 dark:text-teal-400 text-lg"></i>
+              </div>
             </div>
-            <p className="text-sm font-medium text-muted-foreground">স্পট খুঁজে আনা হচ্ছে...</p>
+            <p className="text-sm font-semibold text-[#1C1917] dark:text-stone-200">স্পট খুঁজে আনা হচ্ছে...</p>
+            <p className="text-xs text-[#78716C] dark:text-stone-400 mt-1">অনুগ্রহ করে অপেক্ষা করুন</p>
           </div>
         ) : spots.length === 0 ? (
           <div className="text-center py-10 px-4">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 flex items-center justify-center border-2 border-dashed border-orange-300 dark:border-orange-700">
-              <i className="bi bi-geo-alt text-3xl text-orange-400"></i>
+            <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 flex items-center justify-center border-2 border-dashed border-orange-200/60 dark:border-orange-700/40 shadow-inner">
+              <i className="bi bi-geo-alt text-3xl text-orange-400 dark:text-orange-300"></i>
             </div>
-            <p className="text-sm font-bold text-foreground mb-1">এখনও কোন স্পট নেই</p>
-            <p className="text-xs text-muted-foreground mb-4">আপনি চাইলে প্রথম ফ্রি ফুড স্পটটি যুক্ত করতে পারেন।</p>
+            <p className="text-sm font-bold text-[#1C1917] dark:text-stone-200 mb-1">এখনও কোন স্পট নেই</p>
+            <p className="text-xs text-[#78716C] dark:text-stone-400 mb-4">আপনি চাইলে প্রথম ফ্রি ফুড স্পটটি যুক্ত করতে পারেন।</p>
             <button
               onClick={onAddClick}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 text-white text-sm font-bold hover:shadow-lg transition-all active:scale-95"
+              className="btn-primary"
             >
               <i className="bi bi-plus-lg"></i> স্পট যোগ করুন
             </button>
           </div>
         ) : totalFiltered === 0 ? (
           <div className="text-center py-10 px-4">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 flex items-center justify-center border-2 border-dashed border-emerald-300 dark:border-emerald-700">
-              <i className="bi bi-funnel text-3xl text-emerald-400"></i>
+            <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 flex items-center justify-center border-2 border-dashed border-emerald-200/60 dark:border-emerald-700/40 shadow-inner">
+              <i className="bi bi-funnel text-3xl text-emerald-400 dark:text-emerald-300"></i>
             </div>
-            <p className="text-sm font-bold text-foreground mb-1">এই ক্যাটাগরিতে কোন স্পট নেই</p>
+            <p className="text-sm font-bold text-[#1C1917] dark:text-stone-200 mb-1">এই ক্যাটাগরিতে কোন স্পট নেই</p>
             <button
               onClick={() => setActiveFilter("all")}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 text-white text-sm font-bold hover:shadow-lg transition-all active:scale-95"
+              className="btn-primary"
             >
               <i className="bi bi-grid-3x3-gap-fill"></i> সব স্পট দেখুন
             </button>
@@ -232,14 +234,14 @@ export default function BottomSheet({
             {filteredTodaySpots.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 px-1 mb-2 mt-1">
-                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-sm">
                     <i className="bi bi-fire text-white text-[10px]"></i>
                   </div>
-                  <span className="text-xs font-bold text-foreground">আজকের স্পট</span>
+                  <span className="text-xs font-bold text-[#1C1917] dark:text-stone-200">আজকের স্পট</span>
                   <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded-full">
                     {toBn(filteredTodaySpots.length)}
                   </span>
-                  <div className="flex-1 h-px bg-gradient-to-r from-orange-200 to-transparent dark:from-orange-800"></div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-orange-200/60 to-transparent dark:from-orange-800/50"></div>
                 </div>
                 <div className="space-y-2">
                   {filteredTodaySpots.map((spot) => (
@@ -321,10 +323,10 @@ function SpotCard({
       className={`
         group relative p-3.5 rounded-2xl cursor-pointer transition-all duration-300
         ${isLatest
-          ? "bg-gradient-to-r from-teal-500 via-teal-600 to-teal-700 text-white shadow-lg shadow-teal-300/40 dark:shadow-teal-900/50 ring-1 ring-teal-400/50"
+          ? "bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 text-white shadow-lg shadow-teal-300/30 dark:shadow-teal-900/40 ring-1 ring-teal-400/40"
           : isNew
-          ? "new-spot-card bg-card hover:bg-secondary/50 shadow-sm hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-orange-200/50 dark:hover:ring-orange-800/30"
-          : "bg-card hover:bg-secondary/50 shadow-sm hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-border"
+          ? "new-spot-card bg-card hover:bg-secondary/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-orange-200/40 dark:hover:ring-orange-800/20"
+          : "bg-card hover:bg-secondary/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-border"
         }
         ${isSelected ? "ring-2 ring-primary ring-offset-2 dark:ring-offset-background" : ""}
       `}
@@ -339,7 +341,7 @@ function SpotCard({
         {/* Type Marker */}
         <div className="relative shrink-0">
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-md ${
+            className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-sm ${
               isLatest
                 ? "bg-white/20 backdrop-blur-sm border border-white/30"
                 : ""

@@ -49,39 +49,39 @@ export default function Navbar({
   if (compact) {
     return (
       <>
-        <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        <header className="sticky top-0 z-50 bg-[#FAFAF9]/90 dark:bg-[#111111]/90 backdrop-blur-xl border-b border-stone-200/60 dark:border-stone-700/40">
           <div className="container mx-auto px-3 sm:px-4 py-3">
             <div className="flex items-center justify-between">
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-2">
-                <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center">
-                  <span className="text-lg">🍽️</span>
+              <Link href="/" className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 flex items-center justify-center shadow-md shadow-teal-200/30 ring-1 ring-white/50">
+                  <i className="bi bi-cup-hot text-white text-sm"></i>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold leading-none text-emerald-700 dark:text-emerald-400">ফ্রি ফুড</span>
-                  <span className="text-xs font-bold leading-none text-emerald-600 dark:text-emerald-500">ম্যাপ</span>
+                  <span className="text-xs font-bold leading-none text-teal-700 dark:text-teal-400">ফ্রি ফুড</span>
+                  <span className="text-xs font-bold leading-none text-teal-600 dark:text-teal-500">ম্যাপ</span>
                 </div>
               </Link>
 
               {/* Desktop nav */}
               <nav className="hidden md:flex items-center gap-1">
-                <Link href="/" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <Link href="/" className="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-700 dark:hover:text-teal-400 transition-all duration-200">
                   <i className="bi bi-house text-xs mr-1"></i>
                   হোম
                 </Link>
-                <Link href="/events" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <Link href="/events" className="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-700 dark:hover:text-teal-400 transition-all duration-200">
                   <i className="bi bi-calendar3 text-xs mr-1"></i>
                   ইভেন্ট
                 </Link>
-                <Link href="/donate" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <Link href="/donate" className="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200">
                   <i className="bi bi-heart text-xs mr-1"></i>
                   দান করুন
                 </Link>
-                <Link href="/status" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <Link href="/status" className="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:text-teal-700 dark:hover:text-teal-400 transition-all duration-200">
                   <i className="bi bi-info-circle text-xs mr-1"></i>
                   তথ্য
                 </Link>
-                <Link href="/admin" className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                <Link href="/admin" className="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-200">
                   <i className="bi bi-gear text-xs mr-1"></i>
                   এডমিন
                 </Link>
@@ -89,17 +89,17 @@ export default function Navbar({
 
               {/* Mobile menu toggle */}
               <div className="md:hidden flex items-center gap-2">
-                <span className="text-xs font-bold px-2 py-1 rounded-full bg-gradient-to-r from-emerald-600 to-green-500 text-white">
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-sm">
                   {toBn(totalSpots)} স্পট
                 </span>
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 dark:border-gray-700 transition-colors"
+                  className="flex items-center justify-center w-9 h-9 rounded-lg border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-200"
                 >
                   {mobileMenuOpen ? (
-                    <i className="bi bi-x-lg text-sm text-emerald-600" />
+                    <i className="bi bi-x-lg text-sm text-teal-600" />
                   ) : (
-                    <i className="bi bi-list text-sm text-emerald-600" />
+                    <i className="bi bi-list text-sm text-teal-600" />
                   )}
                 </button>
               </div>
@@ -116,46 +116,46 @@ export default function Navbar({
             />
             <div
               ref={menuRef}
-              className="fixed top-14 right-3 z-[1003] w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden md:hidden"
+              className="fixed top-14 right-3 z-[1003] w-56 bg-white dark:bg-stone-900 rounded-xl shadow-xl border border-stone-200/60 dark:border-stone-700/40 overflow-hidden md:hidden animate-fade-in-scale"
             >
               <Link
                 href="/"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors duration-200"
               >
-                <i className="bi bi-house text-emerald-600"></i>
+                <i className="bi bi-house text-teal-600"></i>
                 <span className="text-sm font-medium">হোম</span>
               </Link>
               <Link
                 href="/events"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors duration-200"
               >
-                <i className="bi bi-calendar3 text-emerald-600"></i>
+                <i className="bi bi-calendar3 text-teal-600"></i>
                 <span className="text-sm font-medium">ইভেন্ট</span>
               </Link>
               <Link
                 href="/donate"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200"
               >
-                <i className="bi bi-heart text-red-500"></i>
-                <span className="text-sm font-medium text-red-600">দান করুন</span>
+                <i className="bi bi-heart text-orange-500"></i>
+                <span className="text-sm font-medium text-orange-600">দান করুন</span>
               </Link>
               <Link
                 href="/status"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors duration-200"
               >
-                <i className="bi bi-info-circle text-emerald-600"></i>
+                <i className="bi bi-info-circle text-teal-600"></i>
                 <span className="text-sm font-medium">তথ্য</span>
               </Link>
               <Link
                 href="/admin"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors duration-200"
               >
-                <i className="bi bi-gear text-gray-500"></i>
+                <i className="bi bi-gear text-stone-400"></i>
                 <span className="text-sm font-medium">এডমিন</span>
               </Link>
             </div>
@@ -169,16 +169,16 @@ export default function Navbar({
   return (
     <>
       {/* Floating Header */}
-      <header className="absolute top-0 left-0 right-0 z-[1001] px-3 pt-3 pb-2 bg-gradient-to-b from-white/95 via-white/60 to-transparent pointer-events-none">
+      <header className="absolute top-0 left-0 right-0 z-[1001] px-3 pt-3 pb-2 bg-gradient-to-b from-[#FAFAF9]/95 via-[#FAFAF9]/60 to-transparent dark:from-[#111111]/95 dark:via-[#111111]/60 dark:to-transparent pointer-events-none">
         <div className="flex items-center gap-2 pointer-events-auto">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 px-2 py-1 rounded-xl shadow-md flex-shrink-0 overflow-hidden bg-white border border-emerald-600 hover:shadow-lg transition-all">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center">
-              <span className="text-lg">🍽️</span>
+          <Link href="/" className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl shadow-md flex-shrink-0 overflow-hidden bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm border border-teal-600/30 dark:border-teal-400/20 hover:shadow-lg transition-all duration-200">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-teal-600 to-emerald-600 flex items-center justify-center">
+              <i className="bi bi-cup-hot text-white text-xs"></i>
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold leading-none text-emerald-700">ফ্রি ফুড</span>
-              <span className="text-[10px] font-bold leading-none text-emerald-600">ম্যাপ</span>
+              <span className="text-[10px] font-bold leading-none text-teal-700 dark:text-teal-400">ফ্রি ফুড</span>
+              <span className="text-[10px] font-bold leading-none text-teal-600 dark:text-teal-500">ম্যাপ</span>
             </div>
           </Link>
 

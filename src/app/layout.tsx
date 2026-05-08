@@ -32,6 +32,12 @@ export default function RootLayout({
   return (
     <html lang="bn" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
         <link
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -41,7 +47,7 @@ export default function RootLayout({
       </head>
       <body
         className="antialiased"
-        style={{ fontFamily: '"Segoe UI", system-ui, sans-serif' }}
+        style={{ fontFamily: '"Noto Sans Bengali", "Hind Siliguri", system-ui, sans-serif' }}
       >
         <ThemeProvider
           attribute="class"

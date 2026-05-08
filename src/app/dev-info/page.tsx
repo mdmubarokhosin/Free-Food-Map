@@ -22,8 +22,8 @@ export default function DevInfoPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-emerald-600 via-green-500 to-teal-500 text-white py-12 px-4 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-orange-500/30">
+      <div className="bg-gradient-to-br from-teal-700 via-emerald-600 to-teal-600 text-white py-12 px-4 text-center relative overflow-hidden">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-orange-200/30 ring-4 ring-white/10">
           <i className="bi bi-cup-hot-fill text-3xl"></i>
         </div>
         <h1 className="text-3xl font-bold mb-2">ফ্রি ফুড ম্যাপ</h1>
@@ -59,7 +59,7 @@ export default function DevInfoPage() {
               { icon: <i className="bi bi-arrow-repeat text-2xl text-blue-500"></i>, title: "২৪/৭ আপডেট", desc: "নতুন স্পট রিয়েল-টাইমে যোগ হয়" },
               { icon: <i className="bi bi-star-fill text-2xl text-amber-500"></i>, title: "রিভিউ সিস্টেম", desc: "স্পট সম্পর্কে মতামত দিন ও পড়ুন" },
             ].map((f) => (
-              <div key={f.title} className="bg-card rounded-xl p-4 border border-border hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+              <div key={f.title} className="bg-card rounded-xl p-4 border border-stone-200/60 dark:border-stone-700/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 {f.icon}
                 <h3 className="text-sm font-bold text-foreground mt-2">{f.title}</h3>
                 <p className="text-xs text-muted-foreground mt-1">{f.desc}</p>
@@ -73,7 +73,7 @@ export default function DevInfoPage() {
           <h2 className="text-xl font-bold text-foreground mb-4 text-center">আমাদের টিম</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {team.length > 0 ? team.map((member) => (
-              <div key={member.id} className="bg-card rounded-xl p-4 border border-border text-center hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+              <div key={member.id} className="bg-card rounded-xl p-4 border border-stone-200/60 dark:border-stone-700/40 text-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-xl mx-auto">
                   {member.name.charAt(0)}
                 </div>
@@ -96,7 +96,7 @@ export default function DevInfoPage() {
         </div>
 
         {/* About */}
-        <div className="bg-card rounded-2xl p-6 border border-border text-center hover:shadow-lg transition-all duration-200">
+        <div className="bg-card rounded-2xl p-6 border border-stone-200/60 dark:border-stone-700/40 text-center hover:shadow-lg transition-all duration-300">
           <h2 className="text-lg font-bold text-foreground mb-3">আমাদের সম্পর্কে</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             ফ্রি ফুড ম্যাপ একটি কমিউনিটি-চালিত প্রকল্প যার লক্ষ্য হল বাংলাদেশে বিনামূল্যে খাবার বিতরণের
@@ -113,7 +113,7 @@ export default function DevInfoPage() {
 
         {/* CTA */}
         <div className="text-center py-4">
-          <a href="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold hover:shadow-lg hover:shadow-orange-200 transition-all hover:-translate-y-0.5">
+          <a href="/" className="btn-accent text-base px-8 py-3.5">
             <i className="bi bi-cup-hot text-lg"></i> নতুন স্পট যোগ করুন
           </a>
         </div>

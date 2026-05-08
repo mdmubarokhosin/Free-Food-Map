@@ -117,12 +117,12 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
   return (
     <div className="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg mx-0 sm:mx-4 mb-0 sm:mb-0 bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl animate-slide-up sm:animate-fade-in max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="relative w-full max-w-lg mx-0 sm:mx-4 mb-0 sm:mb-0 bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl animate-slide-up sm:animate-fade-in-scale max-h-[90vh] overflow-y-auto custom-scrollbar border border-border/50" >
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 px-5 py-4 rounded-t-2xl sm:rounded-t-2xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 px-5 py-4 rounded-t-2xl sm:rounded-t-2xl relative overflow-hidden shadow-lg shadow-orange-200/30 dark:shadow-orange-900/30">
           <div className="absolute inset-0 opacity-10">
             <i className="bi bi-cup-hot-fill absolute top-2 right-4 text-6xl text-white rotate-12"></i>
           </div>
@@ -162,7 +162,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 placeholder="যেমন: মসজিদুল ফালাহ কমিউনিটি সেন্টার"
                 maxLength={100}
                 required
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
+                className="form-input pl-9"
               />
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 placeholder="যেমন: ধানমন্ডি ২৭"
                 maxLength={100}
                 required
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
+                className="form-input pl-9"
               />
             </div>
           </div>
@@ -198,7 +198,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as SpotType)}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all appearance-none"
+                className="form-input pl-9 appearance-none"
               >
                 {Object.entries(SPOT_TYPE_CONFIG).map(([key, cfg]) => (
                   <option key={key} value={key}>
@@ -222,7 +222,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 onChange={(e) => setLat(e.target.value)}
                 placeholder="অক্ষাংশ (lat)"
                 readOnly
-                className="flex-1 px-3 py-2.5 rounded-xl border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
+                className="form-input"
               />
               <input
                 type="text"
@@ -230,7 +230,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 onChange={(e) => setLng(e.target.value)}
                 placeholder="দ্রাঘিমাংশ (lng)"
                 readOnly
-                className="flex-1 px-3 py-2.5 rounded-xl border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
+                className="form-input"
               />
             </div>
             <div className="flex gap-2">
@@ -267,7 +267,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 onChange={(e) => setLocationSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleLocationSearch())}
                 placeholder="এলাকা খুঁজে লোকেশন বেছে নিন..."
-                className="flex-1 px-3 py-2 rounded-lg border border-border bg-secondary/30 text-xs focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all"
+                className="form-input text-xs py-2"
               />
               <button
                 type="button"
@@ -311,7 +311,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
               onChange={(e) => setNotes(e.target.value)}
               placeholder="অতিরিক্ত তথ্য..."
               rows={2}
-              className="w-full px-3 py-2.5 rounded-xl border border-border bg-secondary/30 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all resize-none"
+              className="form-input resize-none"
             />
           </div>
 
@@ -319,7 +319,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
           <button
             type="submit"
             disabled={submitting || !name.trim() || !area.trim() || !lat || !lng}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:via-amber-600 hover:to-orange-700 text-white font-bold text-sm hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:via-amber-600 hover:to-orange-700 text-white font-bold text-sm hover:shadow-xl hover:shadow-orange-200/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
           >
             {submitting ? (
               <><div className="spinner w-4 h-4 border-2 border-white/30 border-t-white"></div> সংরক্ষণ হচ্ছে...</>
