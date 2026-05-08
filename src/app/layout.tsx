@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://free-food-map.pages.dev"),
   title: "ফ্রি ফুড ম্যাপ - সারাবছর ফ্রি খাবারের স্পট খুঁজুন",
   description: "আপনার শহরে কোথায় ফ্রি খাবার পাওয়া যায় তা সহজে খুঁজুন। ফ্রি মিল, স্যুপ কিচেন, গ্রোসারি সহায়তা এবং সাপ্তাহিক খাবার বিতরণের স্থান খুঁজে বের করুন।",
   keywords: ["ফ্রি খাবার", "ফ্রি মিল", "স্যুপ কিচেন", "গ্রোসারি সহায়তা", "বাংলাদেশ", "খাবার বিতরণ"],
@@ -16,6 +17,10 @@ export const metadata: Metadata = {
     title: "ফ্রি ফুড ম্যাপ",
     description: "আপনার শহরে কোথায় ফ্রি খাবার পাওয়া যায় তা সহজে খুঁজুন",
     type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

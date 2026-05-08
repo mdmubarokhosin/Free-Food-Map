@@ -29,6 +29,30 @@ export default function Footer() {
           <i className="bi bi-info-circle text-xs"></i>
           <span>আমাদের সম্পর্কে</span>
         </a>
+        <div className="w-px h-3 bg-stone-200" />
+        <a
+          href="/dev-info"
+          className="flex items-center gap-1 text-[11px] text-stone-400 hover:text-emerald-600 transition-colors"
+        >
+          <i className="bi bi-question-circle text-xs"></i>
+          <span>কিভাবে কাজ করে</span>
+        </a>
+        <div className="w-px h-3 bg-stone-200" />
+        <a
+          href="/dev-info"
+          className="flex items-center gap-1 text-[11px] text-stone-400 hover:text-emerald-600 transition-colors"
+        >
+          <i className="bi bi-envelope text-xs"></i>
+          <span>যোগাযোগ</span>
+        </a>
+        <div className="w-px h-3 bg-stone-200" />
+        <a
+          href="/admin"
+          className="flex items-center gap-1 text-[11px] text-stone-400 hover:text-orange-500 transition-colors"
+        >
+          <i className="bi bi-gear-fill text-xs"></i>
+          <span>এডমিন</span>
+        </a>
       </div>
     </footer>
   );

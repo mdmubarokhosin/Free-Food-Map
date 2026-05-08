@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useMemo } from "react";
-import type { Spot } from "@/types";
+import type { Spot, SpotType } from "@/types";
 import { SPOT_TYPE_CONFIG } from "@/types";
 
 interface BottomSheetProps {
@@ -16,6 +16,12 @@ interface BottomSheetProps {
   isLoading?: boolean;
 }
 
+// Helper: convert English numerals to Bengali numerals
+function toBn(n: number): string {
+  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(n).replace(/\d/g, (d) => bnDigits[parseInt(d)]);
+}
+
 function formatTimeAgo(timestamp: number): string {
   const diff = Date.now() - timestamp;
   const mins = Math.floor(diff / 60000);
@@ -23,16 +29,47 @@ function formatTimeAgo(timestamp: number): string {
   const days = Math.floor(diff / 86400000);
 
   if (mins < 1) return "এখনই";
-  if (mins < 60) return `${mins} মিনিট আগে`;
-  if (hours < 24) return `${hours} ঘন্টা আগে`;
+  if (mins < 60) return `${toBn(mins)} মিনিট আগে`;
+  if (hours < 24) return `${toBn(hours)} ঘন্টা আগে`;
   if (days === 1) return "গতকাল";
-  return `${days} দিন আগে`;
+  return `${toBn(days)} দিন আগে`;
 }
 
 function isOldSpot(timestamp: number): boolean {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return timestamp < today.getTime();
+}
+
+// Helper: get open/closed status for a spot
+function getOpenStatus(spot: Spot): { status: "open" | "closing" | "closed" | "unknown"; label: string; color: string } {
+  if (!spot.openTime || !spot.closeTime || spot.openTime === "00:00" && spot.closeTime === "23:59") {
+    return { status: "unknown", label: "তথ্য নেই", color: "status-unknown" };
+  }
+
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const [openH, openM] = spot.openTime.split(":").map(Number);
+  const [closeH, closeM] = spot.closeTime.split(":").map(Number);
+  const openMinutes = openH * 60 + openM;
+  const closeMinutes = closeH * 60 + closeM;
+
+  // Check if today is an open day
+  const todayName = now.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+  if (spot.openDays && spot.openDays.length > 0 && !spot.openDays.includes(todayName)) {
+    return { status: "closed", label: "বন্ধ", color: "status-closed" };
+  }
+
+  // Opening within 1 hour
+  if (currentMinutes < openMinutes && openMinutes - currentMinutes <= 60) {
+    return { status: "closing", label: "শীঘ্রই শুরু", color: "status-closing" };
+  }
+
+  if (currentMinutes >= openMinutes && currentMinutes < closeMinutes) {
+    return { status: "open", label: "চলছে", color: "status-open" };
+  }
+
+  return { status: "closed", label: "বন্ধ", color: "status-closed" };
 }
 
 export default function BottomSheet({
@@ -48,9 +85,24 @@ export default function BottomSheet({
 }: BottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [touchStart, setTouchStart] = useState(0);
+  const [activeFilter, setActiveFilter] = useState<string>("all");
 
   const todaySpots = useMemo(() => spots.filter((s) => !isOldSpot(s.createdAt)), [spots]);
   const oldSpots = useMemo(() => spots.filter((s) => isOldSpot(s.createdAt)), [spots]);
+  const verifiedCount = useMemo(() => spots.filter((s) => s.verified && s.active).length, [spots]);
+
+  // Filter spots by active type filter
+  const filteredTodaySpots = useMemo(() => {
+    if (activeFilter === "all") return todaySpots;
+    return todaySpots.filter((s) => s.type === activeFilter);
+  }, [todaySpots, activeFilter]);
+
+  const filteredOldSpots = useMemo(() => {
+    if (activeFilter === "all") return oldSpots;
+    return oldSpots.filter((s) => s.type === activeFilter);
+  }, [oldSpots, activeFilter]);
+
+  const totalFiltered = filteredTodaySpots.length + filteredOldSpots.length;
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.touches[0].clientY);
@@ -90,11 +142,11 @@ export default function BottomSheet({
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-white">স্পট সমূহ</h2>
                 <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold backdrop-blur-sm">
-                  {spots.length}
+                  {toBn(spots.length)}
                 </span>
               </div>
               <p className="text-[10px] text-white/70 mt-0.5">
-                {todaySpots.length > 0 ? `${todaySpots.length}টি নতুন` : "কোন নতুন স্পট নেই"}
+                সর্বমোট: {toBn(spots.length)} | নতুন: {toBn(todaySpots.length)} | নিশ্চিত: {toBn(verifiedCount)}
               </p>
             </div>
           </div>
@@ -120,11 +172,18 @@ export default function BottomSheet({
 
       {/* Quick type filter chips */}
       <div className="flex items-center gap-2 px-4 pb-2 overflow-x-auto no-scrollbar">
-        <button className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[11px] font-semibold border border-emerald-200 dark:border-emerald-800">
+        <button
+          onClick={() => setActiveFilter("all")}
+          className={activeFilter === "all" ? "filter-chip-active" : "filter-chip"}
+        >
           <i className="bi bi-grid-3x3-gap-fill text-[10px]"></i> সব
         </button>
         {Object.entries(SPOT_TYPE_CONFIG).map(([key, val]) => (
-          <button key={key} className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full bg-secondary text-muted-foreground text-[11px] font-medium border border-border hover:bg-secondary/80 transition-colors">
+          <button
+            key={key}
+            onClick={() => setActiveFilter(key)}
+            className={activeFilter === key ? "filter-chip-active" : "filter-chip"}
+          >
             <span>{val.emoji}</span> {val.label}
           </button>
         ))}
@@ -145,8 +204,8 @@ export default function BottomSheet({
             <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 flex items-center justify-center border-2 border-dashed border-orange-300 dark:border-orange-700">
               <i className="bi bi-geo-alt text-3xl text-orange-400"></i>
             </div>
-            <p className="text-sm font-bold text-foreground mb-1">কোন স্পট পাওয়া যায়নি</p>
-            <p className="text-xs text-muted-foreground mb-4">এখনই নতুন ফ্রি ফুড স্পট যোগ করুন এবং সবাইকে সাহায্য করুন</p>
+            <p className="text-sm font-bold text-foreground mb-1">এখনও কোন স্পট নেই</p>
+            <p className="text-xs text-muted-foreground mb-4">আপনি চাইলে প্রথম ফ্রি ফুড স্পটটি যুক্ত করতে পারেন।</p>
             <button
               onClick={onAddClick}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-bold hover:shadow-lg transition-all active:scale-95"
@@ -154,10 +213,23 @@ export default function BottomSheet({
               <i className="bi bi-plus-lg"></i> স্পট যোগ করুন
             </button>
           </div>
+        ) : totalFiltered === 0 ? (
+          <div className="text-center py-10 px-4">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 flex items-center justify-center border-2 border-dashed border-emerald-300 dark:border-emerald-700">
+              <i className="bi bi-funnel text-3xl text-emerald-400"></i>
+            </div>
+            <p className="text-sm font-bold text-foreground mb-1">এই ক্যাটাগরিতে কোন স্পট নেই</p>
+            <button
+              onClick={() => setActiveFilter("all")}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 text-white text-sm font-bold hover:shadow-lg transition-all active:scale-95"
+            >
+              <i className="bi bi-grid-3x3-gap-fill"></i> সব স্পট দেখুন
+            </button>
+          </div>
         ) : (
           <>
             {/* Today's Spots */}
-            {todaySpots.length > 0 && (
+            {filteredTodaySpots.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 px-1 mb-2 mt-1">
                   <div className="w-5 h-5 rounded-md bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
@@ -165,12 +237,12 @@ export default function BottomSheet({
                   </div>
                   <span className="text-xs font-bold text-foreground">আজকের স্পট</span>
                   <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-1.5 py-0.5 rounded-full">
-                    {todaySpots.length}
+                    {toBn(filteredTodaySpots.length)}
                   </span>
                   <div className="flex-1 h-px bg-gradient-to-r from-orange-200 to-transparent dark:from-orange-800"></div>
                 </div>
                 <div className="space-y-2">
-                  {todaySpots.map((spot) => (
+                  {filteredTodaySpots.map((spot) => (
                     <SpotCard
                       key={spot.id}
                       spot={spot}
@@ -187,7 +259,7 @@ export default function BottomSheet({
             )}
 
             {/* Old Spots */}
-            {oldSpots.length > 0 && (
+            {filteredOldSpots.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 px-1 mb-2 mt-4">
                   <div className="w-5 h-5 rounded-md bg-secondary flex items-center justify-center">
@@ -195,12 +267,12 @@ export default function BottomSheet({
                   </div>
                   <span className="text-xs font-bold text-muted-foreground">পূর্বের স্পট</span>
                   <span className="text-[10px] font-medium text-muted-foreground bg-secondary px-1.5 py-0.5 rounded-full">
-                    {oldSpots.length}
+                    {toBn(filteredOldSpots.length)}
                   </span>
                   <div className="flex-1 h-px bg-border"></div>
                 </div>
                 <div className="space-y-2">
-                  {oldSpots.map((spot) => (
+                  {filteredOldSpots.map((spot) => (
                     <SpotCard
                       key={spot.id}
                       spot={spot}
@@ -241,6 +313,7 @@ function SpotCard({
   onClick: () => void;
 }) {
   const config = SPOT_TYPE_CONFIG[spot.type] || SPOT_TYPE_CONFIG.other;
+  const openStatus = getOpenStatus(spot);
 
   return (
     <div
@@ -306,20 +379,31 @@ function SpotCard({
           </p>
 
           {/* Type + Time row */}
-          <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             <span className={`text-[10px] font-semibold rounded-lg px-2 py-0.5 ${
               isLatest ? "bg-white/20 text-white" : "text-muted-foreground bg-secondary"
             }`}>
               {config.emoji} {config.label}
             </span>
-            <span className={`text-[10px] ${isLatest ? "text-white/60" : "text-muted-foreground/70"}`}>
-              {formatTimeAgo(spot.createdAt)}
-            </span>
-            {spot.openTime && (
+            {spot.openTime && spot.closeTime && !(spot.openTime === "00:00" && spot.closeTime === "23:59") && (
               <span className={`text-[10px] ${isLatest ? "text-white/60" : "text-muted-foreground/70"}`}>
                 <i className="bi bi-clock text-[9px]"></i> {spot.openTime}-{spot.closeTime}
               </span>
             )}
+            <span className={`text-[10px] ${isLatest ? "text-white/60" : "text-muted-foreground/70"}`}>
+              {formatTimeAgo(spot.createdAt)}
+            </span>
+          </div>
+
+          {/* Open/Closed Status Badge */}
+          <div className="mt-1.5">
+            <span className={`${openStatus.color} ${isLatest && openStatus.status === "open" ? "!bg-white/20 !text-white" : ""}`}>
+              {openStatus.status === "open" && <i className="bi bi-circle-fill text-[6px]"></i>}
+              {openStatus.status === "closing" && <i className="bi bi-clock text-[9px]"></i>}
+              {openStatus.status === "closed" && <i className="bi bi-x-circle text-[9px]"></i>}
+              {openStatus.status === "unknown" && <i className="bi bi-dash-circle text-[9px]"></i>}
+              {openStatus.label}
+            </span>
           </div>
         </div>
 
@@ -334,7 +418,7 @@ function SpotCard({
             }`}
           >
             <i className="bi bi-hand-thumbs-up-fill text-[10px]"></i>
-            <span>{spot.positiveVotes}</span>
+            <span>{toBn(spot.positiveVotes)}</span>
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onDislike(); }}
@@ -345,7 +429,7 @@ function SpotCard({
             }`}
           >
             <i className="bi bi-hand-thumbs-down text-[10px]"></i>
-            <span>{spot.negativeVotes}</span>
+            <span>{toBn(spot.negativeVotes)}</span>
           </button>
         </div>
       </div>
@@ -359,7 +443,7 @@ function SpotCard({
           </div>
           <span className="text-[10px] text-white/50">•</span>
           <span className="text-[10px] text-white/60 flex items-center gap-0.5">
-            <i className="bi bi-eye text-[9px]"></i> {spot.viewCount || 0}
+            <i className="bi bi-eye text-[9px]"></i> {toBn(spot.viewCount || 0)}
           </span>
         </div>
       )}
@@ -367,17 +451,22 @@ function SpotCard({
       {/* Bottom bar for non-latest cards */}
       {!isLatest && (
         <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {spot.verified && (
               <span className="flex items-center gap-0.5 text-[10px] font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded-md">
                 <i className="bi bi-patch-check-fill text-[9px]"></i> ভেরিফাইড
               </span>
             )}
+            {!spot.verified && (
+              <span className="flex items-center gap-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded-md">
+                <i className="bi bi-hourglass-split text-[9px]"></i> ভেরিফিকেশন অপেক্ষমান
+              </span>
+            )}
             {(spot.viewCount || spot.directionCount) && (
               <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                <i className="bi bi-eye text-[9px]"></i> {spot.viewCount || 0}
+                <i className="bi bi-eye text-[9px]"></i> {toBn(spot.viewCount || 0)}
                 {(spot.viewCount || 0) > 0 && (spot.directionCount || 0) > 0 && <span className="ml-1">•</span>}
-                {(spot.directionCount || 0) > 0 && <span className="ml-1 flex items-center gap-0.5"><i className="bi bi-cursor text-[9px]"></i> {spot.directionCount}</span>}
+                {(spot.directionCount || 0) > 0 && <span className="ml-1 flex items-center gap-0.5"><i className="bi bi-cursor text-[9px]"></i> {toBn(spot.directionCount)}</span>}
               </span>
             )}
           </div>
@@ -387,6 +476,7 @@ function SpotCard({
               e.stopPropagation();
               window.open(`https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`, "_blank");
             }}
+            title="ম্যাপে রাস্তা দেখুন"
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700 transition-all active:scale-95 shadow-sm"
           >
             <i className="bi bi-cursor-fill text-[9px]"></i> ডিরেকশন

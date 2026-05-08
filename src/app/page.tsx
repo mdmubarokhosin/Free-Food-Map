@@ -10,6 +10,12 @@ const SpotMap = dynamic(() => import("@/components/app/SpotMap"), { ssr: false }
 const BottomSheet = dynamic(() => import("@/components/app/BottomSheet"), { ssr: false });
 const AddSpotModal = dynamic(() => import("@/components/app/AddSpotModal"), { ssr: false });
 
+// Helper: convert English numerals to Bengali numerals
+function toBn(n: number): string {
+  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(n).replace(/\d/g, (d) => bnDigits[parseInt(d)]);
+}
+
 export default function HomePage() {
   const [spots, setSpots] = useState<Spot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +61,11 @@ export default function HomePage() {
     [spots]
   );
   const activeCount = useMemo(() => spots.filter((s) => s.active).length, [spots]);
+  const todayCount = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return spots.filter((s) => s.createdAt >= today.getTime()).length;
+  }, [spots]);
 
   // Handle vote
   const handleVote = useCallback(
@@ -114,9 +125,14 @@ export default function HomePage() {
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-200/50">
                 <i className="bi bi-cup-hot text-base"></i>
               </div>
-              <h1 className="text-lg font-bold text-foreground hidden sm:block">
-                ফ্রি ফুড ম্যাপ
-              </h1>
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-bold text-foreground leading-tight">
+                  ফ্রি ফুড ম্যাপ
+                </h1>
+                <p className="text-[10px] text-muted-foreground leading-tight">
+                  আপনার শহরে সারাবছর ফ্রি খাবারের স্পট খুঁজুন ও যুক্ত করুন।
+                </p>
+              </div>
             </a>
           </div>
 
@@ -145,10 +161,11 @@ export default function HomePage() {
             {/* Admin link */}
             <a
               href="/admin"
-              className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-secondary transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
               title="এডমিন"
             >
-              <i className="bi bi-gear-fill w-4 h-4 flex items-center justify-center text-sm"></i>
+              <i className="bi bi-gear-fill text-sm"></i>
+              <span className="hidden sm:inline text-xs font-medium">এডমিন</span>
             </a>
           </div>
         </div>
@@ -169,14 +186,10 @@ export default function HomePage() {
         )}
 
         {/* Spot Counter Overlay */}
-        <div className="absolute top-3 left-3 z-[1000] flex flex-col gap-2">
+        <div className="absolute top-3 left-3 z-[1000]">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-semibold shadow-lg shadow-orange-200">
             <i className="bi bi-geo-alt-fill text-sm"></i>
-            <span>সর্বমোট: {activeCount}</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-semibold shadow-lg shadow-emerald-200">
-            <i className="bi bi-patch-check-fill text-sm"></i>
-            <span>নিশ্চিত: {verifiedCount}</span>
+            <span>সর্বমোট: {toBn(activeCount)} | নতুন: {toBn(todayCount)} | নিশ্চিত: {toBn(verifiedCount)}</span>
           </div>
         </div>
 
@@ -220,12 +233,23 @@ export default function HomePage() {
         onAdd={handleAddSpot}
       />
 
-      {/* Floating Footer */}
-      <footer className="glass fixed bottom-0 left-0 right-0 z-[999] py-2 text-center text-xs text-muted-foreground no-print pointer-events-none backdrop-blur-md bg-white/30 border-t border-white/20">
-        <span className="inline-flex items-center gap-1.5">
-          <i className="bi bi-cup-hot text-accent text-xs"></i>
-          ফ্রি ফুড ম্যাপ &copy; {new Date().getFullYear()} — দরিদ্রদের জন্য বিনামূল্যে খাবার
-        </span>
+      {/* Footer Bar */}
+      <footer className="glass relative z-[999] py-2 px-4 no-print backdrop-blur-md bg-white/30 border-t border-white/20">
+        <div className="flex items-center justify-between flex-wrap gap-1.5">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <i className="bi bi-cup-hot text-accent text-xs"></i>
+            <span>ফ্রি ফুড ম্যাপ &copy; {new Date().getFullYear()}</span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground flex-wrap">
+            <a href="/dev-info" className="hover:text-emerald-600 transition-colors">আমাদের সম্পর্কে</a>
+            <span className="text-border">|</span>
+            <a href="/dev-info" className="hover:text-emerald-600 transition-colors">কিভাবে কাজ করে</a>
+            <span className="text-border">|</span>
+            <a href="/dev-info" className="hover:text-emerald-600 transition-colors">যোগাযোগ</a>
+            <span className="text-border">|</span>
+            <a href="/admin" className="hover:text-orange-500 transition-colors">এডমিন লগইন</a>
+          </div>
+        </div>
       </footer>
     </div>
   );
