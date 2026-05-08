@@ -153,7 +153,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <aside className={`admin-sidebar bg-card border-r border-border flex-col ${sidebarOpen ? "w-64" : "w-[68px]"} transition-all duration-300 shrink-0 hidden md:flex overflow-hidden`}>
+      <aside className={`admin-sidebar bg-background border-r border-border flex-col ${sidebarOpen ? "w-64" : "w-[68px]"} transition-all duration-300 shrink-0 hidden md:flex overflow-hidden`}>
         <div className={`p-4 border-b border-border flex items-center gap-3 ${sidebarOpen ? "" : "justify-center"}`}>
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center text-white font-bold shrink-0 shadow-lg shadow-orange-200/50 dark:shadow-orange-900/30">
             <i className="bi bi-cup-hot-fill text-base"></i>
@@ -253,7 +253,7 @@ export default function AdminPage() {
             className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
             onClick={() => setMobileDrawerOpen(false)}
           />
-          <div className="md:hidden fixed top-0 left-0 bottom-0 z-[70] w-[300px] max-w-[85vw] bg-card shadow-2xl animate-slide-up-mobile-drawer flex flex-col">
+          <div className="md:hidden fixed top-0 left-0 bottom-0 z-[70] w-[300px] max-w-[85vw] bg-background shadow-2xl animate-slide-up-mobile-drawer flex flex-col">
             <div className="relative p-5 pb-6 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 overflow-hidden">
               <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />

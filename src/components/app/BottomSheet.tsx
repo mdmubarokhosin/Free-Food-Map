@@ -65,7 +65,7 @@ export default function BottomSheet({
   return (
     <div
       ref={sheetRef}
-      className="bottom-sheet absolute bottom-0 left-0 right-0 z-[1001] flex flex-col no-print"
+      className="bottom-sheet absolute bottom-0 left-0 right-0 z-[1001] flex flex-col no-print bg-card border-t border-border"
       style={{ maxHeight: expanded ? "75vh" : "35vh" }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
