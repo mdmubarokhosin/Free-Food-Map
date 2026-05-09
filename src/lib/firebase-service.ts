@@ -420,6 +420,10 @@ export async function createNotification(notification: Omit<AppNotification, 'id
   return newRef.key || '';
 }
 
+export async function updateNotification(id: string, data: Partial<AppNotification>): Promise<void> {
+  await update(ref(database, `notifications/${id}`), data);
+}
+
 export async function deleteNotification(id: string): Promise<void> {
   await remove(ref(database, `notifications/${id}`));
 }
