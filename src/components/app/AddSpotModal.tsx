@@ -32,7 +32,6 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
   const [submitting, setSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState("");
 
-  // GPS Location
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation) {
       alert("আপনার ব্রাউজারে লোকেশন সাপোর্ট নেই");
@@ -46,7 +45,6 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
         setSearching(false);
       },
       () => {
-        // Fallback: IP-based location
         fetch("https://ipapi.co/json/")
           .then((r) => r.json())
           .then((d) => {
@@ -60,7 +58,6 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
     );
   }, []);
 
-  // Search location (Nominatim)
   const handleLocationSearch = useCallback(async () => {
     if (!locationSearch.trim()) return;
     setSearching(true);
@@ -83,7 +80,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (honeypot) return; // Anti-spam
+    if (honeypot) return;
     if (!name.trim() || !area.trim() || !lat || !lng) return;
 
     setSubmitting(true);
@@ -98,7 +95,6 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
         lng: parseFloat(lng),
         notes: notes.trim() || undefined,
       });
-      // Reset
       setName("");
       setArea("");
       setType("daily_meal");
@@ -119,42 +115,41 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-lg mx-0 sm:mx-4 mb-0 sm:mb-0 bg-card rounded-t-2xl sm:rounded-2xl shadow-2xl animate-slide-up sm:animate-fade-in-scale max-h-[90vh] overflow-y-auto custom-scrollbar border border-border/50" >
-        {/* Header */}
-        <div className="bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 px-5 py-4 rounded-t-2xl sm:rounded-t-2xl relative overflow-hidden shadow-lg shadow-orange-200/30 dark:shadow-orange-900/30">
-          <div className="absolute inset-0 opacity-10">
-            <i className="bi bi-cup-hot-fill absolute top-2 right-4 text-6xl text-white rotate-12"></i>
-          </div>
-          <div className="relative">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
-                  <i className="bi bi-plus-circle-fill text-white text-sm"></i>
-                </div>
-                <h2 className="text-lg font-bold text-white">নতুন স্পট যোগ করুন</h2>
-              </div>
-              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center hover:bg-white/30 transition-colors">
-                <i className="bi bi-x-lg"></i>
-              </button>
+      {/* Modal — Extra rounded like reference */}
+      <div className="relative w-full max-w-lg mx-0 sm:mx-4 mb-0 bg-white rounded-[2.5rem] sm:rounded-[2.5rem] shadow-2xl animate-slide-up sm:animate-fade-in-scale max-h-[90vh] overflow-y-auto custom-scrollbar">
+        {/* Decorative circle at top-right */}
+        <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full gradient-primary-green opacity-10" />
+        <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full gradient-orange-fab opacity-10" />
+
+        <div className="relative p-6 sm:p-8">
+          {/* Close button */}
+          <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#EAE2D7] text-[#93796C] flex items-center justify-center hover:bg-[#D7EADE] transition-colors">
+            <i className="bi bi-x-lg text-sm"></i>
+          </button>
+
+          {/* Centered icon */}
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 rounded-full gradient-primary-green flex items-center justify-center shadow-lg">
+              <i className="bi bi-plus-lg text-white text-2xl"></i>
             </div>
-            <p className="text-white/80 text-xs mt-1 ml-10">বিনামূল্যে খাবার বিতরণের স্থান তথ্য দিন</p>
           </div>
-        </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {/* Honeypot - hidden anti-spam */}
-          <input type="text" name="website" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
+          {/* Title */}
+          <div className="text-center mb-6">
+            <h2 className="text-lg font-bold text-[#0B411F]">নতুন স্পট যোগ করুন</h2>
+            <p className="text-xs text-[#93796C] mt-1">বিনামূল্যে খাবার বিতরণের স্থান তথ্য দিন</p>
+          </div>
 
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1">
-              <i className="bi bi-shop text-orange-400 mr-1"></i>
-              স্থানের নাম <span className="text-destructive">*</span>
-            </label>
-            <div className="relative">
-              <i className="bi bi-shop absolute left-3 top-1/2 -translate-y-1/2 text-orange-400"></i>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input type="text" name="website" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
+
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                <i className="bi bi-shop text-[#107539] mr-1"></i>
+                স্থানের নাম <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={name}
@@ -162,19 +157,16 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 placeholder="যেমন: মসজিদুল ফালাহ কমিউনিটি সেন্টার"
                 maxLength={100}
                 required
-                className="form-input pl-9"
+                className="form-input"
               />
             </div>
-          </div>
 
-          {/* Area */}
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1">
-              <i className="bi bi-pin-map text-orange-400 mr-1"></i>
-              এলাকা / মহল্লা <span className="text-destructive">*</span>
-            </label>
-            <div className="relative">
-              <i className="bi bi-pin-map absolute left-3 top-1/2 -translate-y-1/2 text-orange-400"></i>
+            {/* Area */}
+            <div>
+              <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                <i className="bi bi-pin-map text-[#107539] mr-1"></i>
+                এলাকা / মহল্লা <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 value={area}
@@ -182,23 +174,20 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 placeholder="যেমন: ধানমন্ডি ২৭"
                 maxLength={100}
                 required
-                className="form-input pl-9"
+                className="form-input"
               />
             </div>
-          </div>
 
-          {/* Food Type */}
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1">
-              <i className="bi bi-list-ul text-orange-400 mr-1"></i>
-              খাবারের ধরন <span className="text-destructive">*</span>
-            </label>
-            <div className="relative">
-              <i className="bi bi-list-ul absolute left-3 top-1/2 -translate-y-1/2 text-orange-400"></i>
+            {/* Food Type */}
+            <div>
+              <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                <i className="bi bi-list-ul text-[#107539] mr-1"></i>
+                খাবারের ধরন <span className="text-red-500">*</span>
+              </label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as SpotType)}
-                className="form-input pl-9 appearance-none"
+                className="form-input appearance-none"
               >
                 {Object.entries(SPOT_TYPE_CONFIG).map(([key, cfg]) => (
                   <option key={key} value={key}>
@@ -207,131 +196,129 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 ))}
               </select>
             </div>
-          </div>
 
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1">
-              <i className="bi bi-geo-alt text-orange-400 mr-1"></i>
-              লোকেশন <span className="text-destructive">*</span>
-            </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={lat}
-                onChange={(e) => setLat(e.target.value)}
-                placeholder="অক্ষাংশ (lat)"
-                readOnly
-                className="form-input"
-              />
-              <input
-                type="text"
-                value={lng}
-                onChange={(e) => setLng(e.target.value)}
-                placeholder="দ্রাঘিমাংশ (lng)"
-                readOnly
-                className="form-input"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleGPS}
-                disabled={searching}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white text-sm font-semibold transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
-              >
-                {searching ? (
-                  <div className="spinner w-4 h-4 border-2"></div>
-                ) : (
-                  <><i className="bi bi-crosshair"></i> GPS লোকেশন</>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const url = `https://www.google.com/maps?q=${lat},${lng}`;
-                  window.open(url, "_blank");
-                }}
-                disabled={!lat || !lng}
-                className="px-3 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white text-sm font-semibold transition-all disabled:opacity-50 shadow-md hover:shadow-lg"
-              >
-                <i className="bi bi-map"></i>
-              </button>
-            </div>
-
-            {/* Location search */}
-            <div className="mt-2 flex gap-2">
-              <input
-                type="text"
-                value={locationSearch}
-                onChange={(e) => setLocationSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleLocationSearch())}
-                placeholder="এলাকা খুঁজে লোকেশন বেছে নিন..."
-                className="form-input text-xs py-2"
-              />
-              <button
-                type="button"
-                onClick={handleLocationSearch}
-                className="px-3 py-2 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:shadow-md transition-all"
-              >
-                খুঁজুন
-              </button>
-            </div>
-
-            {/* Search results */}
-            {searchResults.length > 0 && (
-              <div className="mt-2 space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
-                {searchResults.map((r, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => {
-                      setLat(r.lat.toFixed(6));
-                      setLng(r.lng.toFixed(6));
-                      setSearchResults([]);
-                      if (!area) setArea(r.name);
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-lg text-xs hover:bg-secondary transition-colors border border-border/50"
-                  >
-                    <i className="bi bi-geo-alt text-orange-500"></i> {r.display_name.length > 60 ? r.display_name.slice(0, 60) + "..." : r.display_name}
-                  </button>
-                ))}
+            {/* Location */}
+            <div>
+              <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                <i className="bi bi-geo-alt text-[#107539] mr-1"></i>
+                লোকেশন <span className="text-red-500">*</span>
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                  placeholder="অক্ষাংশ (lat)"
+                  readOnly
+                  className="form-input"
+                />
+                <input
+                  type="text"
+                  value={lng}
+                  onChange={(e) => setLng(e.target.value)}
+                  placeholder="দ্রাঘিমাংশ (lng)"
+                  readOnly
+                  className="form-input"
+                />
               </div>
-            )}
-          </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleGPS}
+                  disabled={searching}
+                  className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl gradient-primary-green hover:opacity-90 text-white text-sm font-semibold transition-all disabled:opacity-50 shadow-md"
+                >
+                  {searching ? (
+                    <div className="spinner spinner-sm border-2 border-white/30 border-t-white"></div>
+                  ) : (
+                    <><i className="bi bi-crosshair"></i> GPS লোকেশন</>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+                    window.open(url, "_blank");
+                  }}
+                  disabled={!lat || !lng}
+                  className="px-3 py-2 rounded-xl bg-secondary text-sm font-semibold transition-all disabled:opacity-50 hover:bg-[#EAE2D7]"
+                >
+                  <i className="bi bi-map"></i>
+                </button>
+              </div>
 
-          {/* Notes */}
-          <div>
-            <label className="block text-sm font-semibold text-foreground mb-1">
-              <i className="bi bi-chat-left-text text-orange-400 mr-1"></i>
-              বিবরণ (ঐচ্ছিক)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="অতিরিক্ত তথ্য..."
-              rows={2}
-              className="form-input resize-none"
-            />
-          </div>
+              <div className="mt-2 flex gap-2">
+                <input
+                  type="text"
+                  value={locationSearch}
+                  onChange={(e) => setLocationSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleLocationSearch())}
+                  placeholder="এলাকা খুঁজে লোকেশন বেছে নিন..."
+                  className="form-input text-xs py-2"
+                />
+                <button
+                  type="button"
+                  onClick={handleLocationSearch}
+                  className="px-3 py-2 rounded-lg gradient-primary-green text-white text-xs font-semibold hover:opacity-90 transition-all"
+                >
+                  খুঁজুন
+                </button>
+              </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={submitting || !name.trim() || !area.trim() || !lat || !lng}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:via-amber-600 hover:to-orange-700 text-white font-bold text-sm hover:shadow-xl hover:shadow-orange-200/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
-          >
-            {submitting ? (
-              <><div className="spinner w-4 h-4 border-2 border-white/30 border-t-white"></div> সংরক্ষণ হচ্ছে...</>
-            ) : (
-              <><i className="bi bi-check-circle text-sm"></i> স্পট যোগ করুন</>
-            )}
-          </button>
+              {searchResults.length > 0 && (
+                <div className="mt-2 space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+                  {searchResults.map((r, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setLat(r.lat.toFixed(6));
+                        setLng(r.lng.toFixed(6));
+                        setSearchResults([]);
+                        if (!area) setArea(r.name);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg text-xs hover:bg-[#DBF0E3] transition-colors border border-[#EAE2D7]"
+                    >
+                      <i className="bi bi-geo-alt text-[#107539]"></i> {r.display_name.length > 60 ? r.display_name.slice(0, 60) + "..." : r.display_name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
-          <p className="text-center text-[11px] text-muted-foreground">
-            স্পট যোগ করার পর এডমিন যাচাই করবেন
-          </p>
-        </form>
+            {/* Notes */}
+            <div>
+              <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                <i className="bi bi-chat-left-text text-[#107539] mr-1"></i>
+                বিবরণ (ঐচ্ছিক)
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="অতিরিক্ত তথ্য..."
+                rows={2}
+                className="form-input resize-none"
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={submitting || !name.trim() || !area.trim() || !lat || !lng}
+              className="w-full py-3 rounded-2xl gradient-primary-green hover:opacity-90 text-white font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                <><div className="spinner spinner-sm border-2 border-white/30 border-t-white"></div> সংরক্ষণ হচ্ছে...</>
+              ) : (
+                <><i className="bi bi-check-circle text-sm"></i> স্পট যোগ করুন</>
+              )}
+            </button>
+
+            <p className="text-center text-[11px] text-[#93796C]">
+              স্পট যোগ করার পর এডমিন যাচাই করবেন
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );

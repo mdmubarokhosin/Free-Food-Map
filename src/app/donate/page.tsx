@@ -45,7 +45,7 @@ export default function DonatePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-gradient-to-br from-teal-700 via-emerald-600 to-teal-600 text-white py-12 px-4 text-center relative overflow-hidden">
+      <div className="gradient-primary-green text-white py-12 px-4 text-center relative overflow-hidden">
         <h1 className="text-3xl font-bold mb-2"><i className="bi bi-heart-fill"></i> অনুদান করুন</h1>
         <p className="text-white/80 max-w-md mx-auto">
           দরিদ্রদের জন্য বিনামূল্যে খাবার বিতরণে আমাদের সাথে যুক্ত হন। আপনার একটু সাহায্যে কারো অন্ন হতে পারে।
@@ -76,7 +76,7 @@ export default function DonatePage() {
             {tiers.map((tier) => (
               <div key={tier.name} className={`relative bg-card rounded-2xl p-5 border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${tier.popular ? "border-2 border-orange-400 shadow-lg shadow-orange-100/50 ring-1 ring-orange-200/30" : "border-stone-200/60 dark:border-stone-700/40"}`}>
                 {tier.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full gradient-orange-fab text-white text-xs font-bold">
                     <i className="bi bi-star-fill text-[10px]"></i> জনপ্রিয়
                   </span>
                 )}

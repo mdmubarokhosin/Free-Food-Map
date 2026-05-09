@@ -84,10 +84,10 @@ export default function AdminPage() {
   // Login Screen
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-stone-950 via-teal-950 to-stone-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-stone-950 via-[#0B411F] to-stone-950 flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-xl shadow-orange-500/25 ring-4 ring-white/5">
+            <div className="w-16 h-16 rounded-2xl gradient-orange-fab flex items-center justify-center text-3xl mx-auto mb-4 shadow-xl ring-4 ring-white/5">
               <i className="bi bi-shield-lock-fill text-white text-3xl"></i>
             </div>
             <h1 className="text-2xl font-bold text-white">এডমিন প্যানেল</h1>

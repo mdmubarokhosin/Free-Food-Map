@@ -22,8 +22,8 @@ export default function DevInfoPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-gradient-to-br from-teal-700 via-emerald-600 to-teal-600 text-white py-12 px-4 text-center relative overflow-hidden">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-orange-200/30 ring-4 ring-white/10">
+      <div className="gradient-primary-green text-white py-12 px-4 text-center relative overflow-hidden">
+        <div className="w-16 h-16 rounded-2xl gradient-orange-fab flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg ring-4 ring-white/10">
           <i className="bi bi-cup-hot-fill text-3xl"></i>
         </div>
         <h1 className="text-3xl font-bold mb-2">ফ্রি ফুড ম্যাপ</h1>

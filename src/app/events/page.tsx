@@ -166,15 +166,15 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-teal-50/60 via-[#FAFAF9] to-white dark:from-[#111111] dark:to-stone-900">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#DBF0E3]/40 via-[rgb(250,248,245)] to-white dark:from-[#111111] dark:to-stone-900">
       <Navbar onAddSpot={() => {}} compact />
 
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-6 max-w-6xl">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900/30 dark:to-emerald-900/30 rounded-xl shadow-sm">
-              <i className="bi bi-calendar3 text-2xl text-teal-600 dark:text-teal-400"></i>
+            <div className="p-2.5 bg-[#DBF0E3] rounded-xl shadow-sm">
+              <i className="bi bi-calendar3 text-2xl text-[#107539]"></i>
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
@@ -188,7 +188,7 @@ export default function EventsPage() {
         </div>
 
         {/* Filters */}
-        <Card className="mb-6 border-teal-100/60 dark:border-teal-800/30 shadow-sm">
+        <Card className="mb-6 border-[#D7EADE] shadow-sm">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
               {/* View Toggle */}
@@ -280,7 +280,7 @@ export default function EventsPage() {
         {/* Content */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <i className="bi bi-arrow-repeat text-3xl animate-spin text-green-600"></i>
+            <i className="bi bi-arrow-repeat text-3xl animate-spin text-[#107539]"></i>
             <span className="ml-2 text-muted-foreground">লোড হচ্ছে...</span>
           </div>
         ) : events.length === 0 ? (
@@ -366,8 +366,8 @@ export default function EventsPage() {
             {sortedDates.map((date) => (
               <div key={date}>
                 {/* Date Header */}
-                <div className="flex items-center gap-3 mb-3 sticky top-0 bg-gradient-to-b from-teal-50/80 via-[#FAFAF9] to-transparent dark:from-stone-900 dark:via-stone-900 dark:to-transparent z-10 py-2">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 text-white font-bold shadow-lg shadow-teal-200/30">
+                <div className="flex items-center gap-3 mb-3 sticky top-0 bg-gradient-to-b from-[#DBF0E3]/80 via-[rgb(250,248,245)] to-transparent dark:from-stone-900 dark:via-stone-900 dark:to-transparent z-10 py-2">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl gradient-primary-green text-white font-bold shadow-lg">
                     {toBengaliNumber(new Date(date).getDate())}
                   </div>
                   <div>
@@ -392,7 +392,7 @@ export default function EventsPage() {
         )}
 
         {/* Event Type Legend */}
-        <Card className="mt-8 border-teal-100/60 dark:border-teal-800/30 shadow-sm">
+        <Card className="mt-8 border-[#D7EADE] shadow-sm">
           <CardContent className="p-4">
             <h4 className="text-sm font-medium mb-3">ইভেন্টের ধরন</h4>
             <div className="flex flex-wrap gap-3">

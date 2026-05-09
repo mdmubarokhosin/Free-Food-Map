@@ -112,7 +112,7 @@ export default function StatusPage() {
   }, [stats]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-teal-50/40 via-[#FAFAF9] to-white dark:from-[#111111] dark:to-stone-900">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#DBF0E3]/40 via-[rgb(250,248,245)] to-white dark:from-[#111111] dark:to-stone-900">
       <Navbar onAddSpot={() => {}} compact />
 
       <main className="flex-1 container mx-auto px-3 sm:px-4 py-6 max-w-6xl">
@@ -120,8 +120,8 @@ export default function StatusPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2.5 bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900/30 dark:to-emerald-900/30 rounded-xl shadow-sm">
-                <i className="bi bi-bar-chart text-2xl text-teal-600 dark:text-teal-400"></i>
+              <div className="p-2.5 bg-[#DBF0E3] rounded-xl shadow-sm">
+                <i className="bi bi-bar-chart text-2xl text-[#107539]"></i>
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
@@ -155,7 +155,7 @@ export default function StatusPage() {
           <div className="space-y-6">
             {/* Key Metrics Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              <Card className="bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200/50 dark:border-teal-800/30 shadow-sm">
+              <Card className="bg-gradient-to-br from-[#DBF0E3] to-[#D7EADE] border-[#D7EADE] shadow-sm">
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-2 mb-1">
                     <i className="bi bi-geo-alt text-green-600 text-sm"></i>
@@ -167,7 +167,7 @@ export default function StatusPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200/50 dark:border-emerald-800/30 shadow-sm">
+              <Card className="bg-gradient-to-br from-[#D7EADE] to-[#DBF0E3] border-[#D7EADE] shadow-sm">
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-2 mb-1">
                     <i className="bi bi-check-circle text-emerald-600 text-sm"></i>
