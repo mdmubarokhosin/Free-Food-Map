@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchDonations, fetchDonationStats } from "@/lib/firebase-service";
+import { toast } from "sonner";
+import { fetchDonations, fetchDonationStats, addDonation } from "@/lib/firebase-service";
+import { createBohudurPayment } from "@/lib/bohudur-payment";
+import { fetchSetting } from "@/lib/firebase-service";
 import type { Donation, DonationStats } from "@/types";
 
 export default function DonatePage() {
@@ -9,14 +12,77 @@ export default function DonatePage() {
   const [stats, setStats] = useState<DonationStats>({ total: 0, donors: 0, sponsoredSpots: 0 });
   const [loading, setLoading] = useState(true);
 
+  // Donation form state
+  const [donorName, setDonorName] = useState("");
+  const [donorEmail, setDonorEmail] = useState("");
+  const [donorAmount, setDonorAmount] = useState("");
+  const [donorMessage, setDonorMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [paymentEnabled, setPaymentEnabled] = useState(false);
+
+  const amountPresets = [
+    { label: "১০০৳", value: 100 },
+    { label: "৫০০৳", value: 500 },
+    { label: "১০০০৳", value: 1000 },
+    { label: "৫০০০৳", value: 5000 },
+  ];
+
   useEffect(() => {
     (async () => {
-      const [d, s] = await Promise.all([fetchDonations(), fetchDonationStats()]);
+      const [d, s, bkKey] = await Promise.all([
+        fetchDonations(),
+        fetchDonationStats(),
+        fetchSetting<string>("settings/bohudur/apiKey"),
+      ]);
       setDonations(d.filter((x) => x.status === "confirmed"));
       setStats(s);
+      if (bkKey) setPaymentEnabled(true);
       setLoading(false);
     })();
   }, []);
+
+  const handleDonateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!donorName.trim() || !donorEmail.trim() || !donorAmount) {
+      toast.error("নাম, ইমেইল ও পরিমাণ দিন");
+      return;
+    }
+    const amount = parseInt(donorAmount);
+    if (isNaN(amount) || amount < 10) {
+      toast.error("সর্বনিম্ন অনুদান ৳১০");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Save donation to Firebase first as pending
+      const donationId = await addDonation({
+        donorName: donorName.trim(),
+        amount,
+        currency: "BDT",
+        method: "bohudur",
+        status: "pending",
+        message: donorMessage.trim() || undefined,
+      });
+
+      // Create Bohudur payment
+      const result = await createBohudurPayment({
+        full_name: donorName.trim(),
+        email: donorEmail.trim(),
+        amount,
+        message: donorMessage.trim(),
+      });
+
+      // Redirect to payment page
+      if (result.payment_url) {
+        window.location.href = result.payment_url;
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "পেমেন্ট তৈরি ব্যর্থ");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const paymentMethods = [
     { name: "bKash", number: "০১XXXXXXXXX", color: "#E2136E", icon: <i className="bi bi-phone text-2xl text-pink-500"></i> },
@@ -69,6 +135,57 @@ export default function DonatePage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+
+        {/* Online Payment Form (Bohudur) */}
+        {paymentEnabled && (
+          <div className="bg-gradient-to-r from-[#107539] to-[#1C9C4B] rounded-2xl p-6 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                  <i className="bi bi-credit-card-2-front-fill text-xl"></i>
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold">অনলাইন পেমেন্ট</h2>
+                  <p className="text-xs text-white/60">নিরাপদে অনলাইনে অনুদান দিন</p>
+                </div>
+              </div>
+              <form onSubmit={handleDonateSubmit} className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input type="text" value={donorName} onChange={e => setDonorName(e.target.value)} placeholder="আপনার নাম" required
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 text-sm" />
+                  <input type="email" value={donorEmail} onChange={e => setDonorEmail(e.target.value)} placeholder="ইমেইল ঠিকানা" required
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 text-sm" />
+                </div>
+                <input type="text" value={donorMessage} onChange={e => setDonorMessage(e.target.value)} placeholder="বার্তা (ঐচ্ছিক)"
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 text-sm" />
+                <div>
+                  <label className="block text-xs font-bold text-white/70 mb-2">অনুদানের পরিমাণ</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {amountPresets.map((preset) => (
+                      <button type="button" key={preset.value} onClick={() => setDonorAmount(String(preset.value))}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${donorAmount === String(preset.value) ? "bg-white text-[#107539]" : "bg-white/15 text-white hover:bg-white/25 border border-white/20"}`}>
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 font-bold">৳</span>
+                    <input type="number" value={donorAmount} onChange={e => setDonorAmount(e.target.value)} placeholder="কাস্টম পরিমাণ" min="10" required
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 text-sm" />
+                  </div>
+                </div>
+                <button type="submit" disabled={submitting || !donorName || !donorEmail || !donorAmount}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-sm hover:shadow-lg hover:shadow-orange-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                  {submitting ? <><div className="spinner spinner-sm border-2 border-white/30 border-t-white"></div> পেমেন্ট হচ্ছে...</> : <><i className="bi bi-shield-check"></i> অনুদান দিন</>}
+                </button>
+                <p className="text-center text-[10px] text-white/40">নিরাপদ পেমেন্ট গেটওয়ে — Bohudur</p>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* Donation Tiers */}
         <div>
           <h2 className="text-xl font-bold text-foreground mb-4">অনুদানের স্তর</h2>

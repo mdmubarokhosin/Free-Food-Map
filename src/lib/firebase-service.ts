@@ -28,6 +28,7 @@ function parseSpotData(key: string, spot: Record<string, unknown>): Spot {
     openTime: (spot.openTime as string) || '00:00',
     closeTime: (spot.closeTime as string) || '23:59',
     notes: (spot.notes as string) || null,
+    image: (spot.image as string) || null,
     verified: (spot.verified as boolean) || false,
     active: (spot.active as boolean) !== false,
     createdAt: (spot.createdAt as number) || Date.now(),
@@ -79,7 +80,7 @@ export async function createSpot(spotData: {
   name: string; type: SpotType; address: string; area: string;
   city: string; country: string; lat: number; lng: number;
   openDays: string[]; openTime: string; closeTime: string;
-  notes?: string; startDate?: string | null; endDate?: string | null; autoDelete?: boolean;
+  notes?: string; image?: string; startDate?: string | null; endDate?: string | null; autoDelete?: boolean;
 }): Promise<string> {
   const spotsRef = ref(database, 'spots');
   const newSpotRef = push(spotsRef);
@@ -481,8 +482,60 @@ export async function fetchStats(): Promise<AppStats> {
 // ============================================
 // ADMIN AUTH
 // ============================================
-export function verifyAdminPassword(password: string): boolean {
-  return password === 'admin123';
+const DEFAULT_ADMIN_PASSWORD = 'admin123';
+
+export async function verifyAdminPassword(password: string): Promise<boolean> {
+  try {
+    const storedPassword = await fetchSetting<string>('settings/admin/password');
+    return password === (storedPassword || DEFAULT_ADMIN_PASSWORD);
+  } catch {
+    return password === DEFAULT_ADMIN_PASSWORD;
+  }
+}
+
+export async function updateAdminPassword(currentPassword: string, newPassword: string): Promise<boolean> {
+  const isCurrentValid = await verifyAdminPassword(currentPassword);
+  if (!isCurrentValid) {
+    throw new Error('বর্তমান পাসওয়ার্ড ভুল হয়েছে');
+  }
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error('নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে');
+  }
+  await updateSetting('settings/admin/password', newPassword);
+  return true;
+}
+
+// ============================================
+// GENERIC SETTINGS HELPERS
+// ============================================
+export async function fetchSetting<T>(path: string): Promise<T | null> {
+  try {
+    const settingsRef = ref(database, path);
+    const snapshot = await get(settingsRef);
+    if (!snapshot.exists()) return null;
+    return snapshot.val() as T;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateSetting(path: string, value: unknown): Promise<void> {
+  await set(ref(database, path), value);
+}
+
+export async function fetchSettingsGroup(path: string): Promise<Record<string, unknown>> {
+  try {
+    const settingsRef = ref(database, path);
+    const snapshot = await get(settingsRef);
+    if (!snapshot.exists()) return {};
+    return snapshot.val() as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+export async function updateSettingsGroup(path: string, data: Record<string, unknown>): Promise<void> {
+ await update(ref(database, path), data);
 }
 
 // ============================================

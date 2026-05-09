@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import type { SpotType } from "@/types";
 import { SPOT_TYPE_CONFIG } from "@/types";
+import { uploadImageToGitHub } from "@/lib/github-upload";
 
 const WEEK_DAYS = [
   { key: "saturday", label: "শনি" },
@@ -30,6 +31,7 @@ interface AddSpotModalProps {
     openTime: string;
     closeTime: string;
     notes?: string;
+    image?: string;
   }) => void | Promise<void>;
 }
 
@@ -50,6 +52,11 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
   const [submitting, setSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [error, setError] = useState("");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation) {
@@ -113,6 +120,41 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
     setSearching(false);
   }, [locationSearch]);
 
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('শুধুমাত্র ইমেজ ফাইল আপলোড করুন'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('ফাইল সাইজ ৫MB এর বেশি হতে পারবে না'); return; }
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleUploadImage = useCallback(async () => {
+    if (!selectedFile) return;
+    setUploadingImage(true);
+    try {
+      const url = await uploadImageToGitHub(selectedFile);
+      setImageUrl(url);
+      toast.success("ইমেজ আপলোড সফল!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "ইমেজ আপলোড ব্যর্থ");
+      setImagePreview(null);
+      setImageUrl("");
+      setSelectedFile(null);
+    } finally {
+      setUploadingImage(false);
+    }
+  }, [selectedFile]);
+
+  const handleRemoveImage = useCallback(() => {
+    setImagePreview(null);
+    setImageUrl("");
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (honeypot) return;
@@ -151,6 +193,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
         openTime: allDay ? "00:00" : openTime,
         closeTime: allDay ? "23:59" : closeTime,
         notes: notes.trim() || undefined,
+        image: imageUrl || undefined,
       });
       // Support both sync and async onAdd
       if (result instanceof Promise) {
@@ -170,6 +213,9 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
       setSearchResults([]);
       setLocationSearch("");
       setError("");
+      setImagePreview(null);
+      setImageUrl("");
+      setSelectedFile(null);
     } catch (err) {
       console.error("AddSpotModal error:", err);
       const msg = err instanceof Error ? err.message : "অজানা ত্রুটি";
@@ -223,6 +269,44 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <input type="text" name="website" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
+
+            {/* Image Upload */}
+            <div>
+              <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                <i className="bi bi-image text-[#107539] mr-1"></i>
+                স্পটের ছবি (ঐচ্ছিক)
+              </label>
+              {imagePreview ? (
+                <div className="relative rounded-xl overflow-hidden border-2 border-[#DBF0E3] bg-green-50/30">
+                  <img src={imagePreview} alt="প্রিভিউ" className="w-full h-40 object-cover" />
+                  <div className="absolute top-2 right-2 flex gap-1.5">
+                    {!imageUrl && selectedFile && (
+                      <button type="button" onClick={handleUploadImage} disabled={uploadingImage}
+                        className="px-3 py-1.5 rounded-lg bg-[#107539] text-white text-xs font-bold hover:bg-[#0B411F] transition-all disabled:opacity-50 flex items-center gap-1">
+                        {uploadingImage ? <><div className="spinner spinner-sm border-2 border-white/30 border-t-white"></div> আপলোড হচ্ছে</> : <><i className="bi bi-cloud-arrow-up"></i> আপলোড</>}
+                      </button>
+                    )}
+                    <button type="button" onClick={handleRemoveImage}
+                      className="w-8 h-8 rounded-lg bg-red-500/90 flex items-center justify-center hover:bg-red-600 transition-colors">
+                      <i className="bi bi-x-lg text-white text-xs"></i>
+                    </button>
+                  </div>
+                  {imageUrl && (
+                    <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-green-500/90 text-white px-2 py-1 rounded-lg text-[10px] font-bold">
+                      <i className="bi bi-check-circle-fill"></i> আপলোড সম্পন্ন
+                    </div>
+                  )}
+                  {uploadingImage && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><div className="spinner spinner-sm border-2 border-white/30 border-t-white"></div></div>}
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center h-28 rounded-xl border-2 border-dashed border-[#C1D3CD] bg-[#DBF0E3]/30 cursor-pointer hover:bg-[#DBF0E3]/60 hover:border-[#107539]/40 transition-all">
+                  <i className="bi bi-cloud-arrow-up text-xl text-[#107539]/50 mb-1.5"></i>
+                  <span className="text-xs font-medium text-[#0B411F]/70">ক্লিক করে ছবি বাছাই করুন</span>
+                  <span className="text-[10px] text-[#93796C] mt-0.5">সর্বোচ্চ ৫MB, JPG/PNG/WebP</span>
+                  <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" ref={fileInputRef} />
+                </label>
+              )}
+            </div>
 
             {/* Name */}
             <div>

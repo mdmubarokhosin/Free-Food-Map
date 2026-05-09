@@ -19,6 +19,7 @@ export interface Spot {
   openTime: string;
   closeTime: string;
   notes: string | null;
+  image?: string | null;
   verified: boolean;
   active: boolean;
   createdAt: number;

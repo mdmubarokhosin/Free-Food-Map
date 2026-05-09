@@ -101,13 +101,22 @@ export default function SpotCard({
     >
       {/* Top row: type badge + name + actions */}
       <div className="flex items-start gap-2">
-        {/* Type icon */}
-        <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-lg"
-          style={{ backgroundColor: typeConfig.color + '18' }}
-        >
-          {typeConfig.emoji}
-        </div>
+        {/* Type icon or Image */}
+        {spot.image ? (
+          <div className="w-16 h-12 rounded-lg overflow-hidden shrink-0 relative">
+            <img src={spot.image} alt={spot.name} className="w-full h-full object-cover" loading="lazy" />
+            <div className="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px]" style={{ backgroundColor: typeConfig.color }}>
+              {typeConfig.emoji}
+            </div>
+          </div>
+        ) : (
+          <div
+            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-lg"
+            style={{ backgroundColor: typeConfig.color + '18' }}
+          >
+            {typeConfig.emoji}
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">

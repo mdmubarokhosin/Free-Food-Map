@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
-  verifyAdminPassword, fetchSpots, createSpot, updateSpot, deleteSpot,
+  verifyAdminPassword, updateAdminPassword,
+  fetchSpots, createSpot, updateSpot, deleteSpot,
   fetchEvents, createEvent, updateEvent, deleteEvent as deleteEventFn,
   fetchDonations, addDonation, updateDonation as updateDonationFn, deleteDonation as deleteDonationFn,
   fetchTeamMembers, addTeamMember, updateTeamMember, deleteTeamMember as deleteTeamMemberFn,
@@ -12,7 +13,10 @@ import {
   fetchStats, exportSpotsToCSV, bulkImportSpots,
   fetchNotifications, createNotification, deleteNotification as deleteNotificationFn,
   updateNotification as updateNotificationFn,
+  fetchSetting, updateSetting, fetchSettingsGroup, updateSettingsGroup,
 } from "@/lib/firebase-service";
+import { uploadImageToGitHub } from "@/lib/github-upload";
+import { testBohudurConnection } from "@/lib/bohudur-payment";
 import type { Spot, SpotType, FoodEvent, Donation, TeamMember, Report, SiteSettings, AppStats, AppNotification } from "@/types";
 import { SPOT_TYPE_CONFIG, DAY_SHORT_LABELS, DAY_ORDER } from "@/types";
 
@@ -123,14 +127,25 @@ export default function AdminPage() {
     if (auth === "true") setAuthenticated(true);
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (verifyAdminPassword(password)) {
-      sessionStorage.setItem("admin-auth", "true");
-      setAuthenticated(true);
-      toast.success("সফলভাবে লগইন হয়েছে!");
-    } else {
-      setLoginError("পাসওয়ার্ড ভুল হয়েছে");
+    setLoginLoading(true);
+    setLoginError("");
+    try {
+      const isValid = await verifyAdminPassword(password);
+      if (isValid) {
+        sessionStorage.setItem("admin-auth", "true");
+        setAuthenticated(true);
+        toast.success("সফলভাবে লগইন হয়েছে!");
+      } else {
+        setLoginError("পাসওয়ার্ড ভুল হয়েছে");
+      }
+    } catch {
+      setLoginError("লগইনে সমস্যা হয়েছে");
+    } finally {
+      setLoginLoading(false);
     }
   };
 
@@ -196,8 +211,8 @@ export default function AdminPage() {
                   <i className="bi bi-exclamation-circle text-xs"></i>{loginError}
                 </div>
               )}
-              <button type="submit" className="w-full py-3.5 rounded-2xl gradient-primary-green text-white font-bold text-sm tracking-wide hover:shadow-lg hover:shadow-[#107539]/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
-                <i className="bi bi-box-arrow-in-right mr-2"></i>প্রবেশ করুন
+              <button type="submit" disabled={loginLoading} className="w-full py-3.5 rounded-2xl gradient-primary-green text-white font-bold text-sm tracking-wide hover:shadow-lg hover:shadow-[#107539]/30 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
+                {loginLoading ? <><div className="spinner spinner-sm inline-block mr-2 border-2 border-white/30 border-t-white"></div>যাচাই হচ্ছে...</> : <><i className="bi bi-box-arrow-in-right mr-2"></i>প্রবেশ করুন</>}
               </button>
             </form>
             <div className="mt-5 pt-5 border-t border-white/[0.06] text-center">
@@ -1144,12 +1159,47 @@ function SettingsTab({ settings, onSave }: {
   settings: SiteSettings | null; onSave: (d: Partial<SiteSettings>) => void;
 }) {
   const [form, setForm] = useState<Partial<SiteSettings>>({});
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+  // Password change state
+  const [currentPwd, setCurrentPwd] = useState("");
+  const [newPwd, setNewPwd] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
+  const [pwdLoading, setPwdLoading] = useState(false);
+
+  // GitHub settings
+  const [ghToken, setGhToken] = useState("");
+  const [ghOwner, setGhOwner] = useState("mdmubarokhosin");
+  const [ghRepo, setGhRepo] = useState("Free-Food-Map");
+  const [ghLoading, setGhLoading] = useState(false);
+
+  // Bohudur settings
+  const [bohudurKey, setBohudurKey] = useState("");
+  const [bohudurShowKey, setBohudurShowKey] = useState(false);
+  const [bohudurLoading, setBohudurLoading] = useState(false);
+  const [bohudurTestLoading, setBohudurTestLoading] = useState(false);
 
   useEffect(() => {
     if (settings) setForm(settings);
   }, [settings]);
 
-  if (!settings || !form.siteName) return <div className="text-center py-16"><div className="spinner mx-auto"></div></div>;
+  // Load additional settings
+  useEffect(() => {
+    const loadExtra = async () => {
+      const [ghSettings, bkSettings] = await Promise.all([
+        fetchSettingsGroup("settings/github"),
+        fetchSetting<string>("settings/bohudur/apiKey"),
+      ]);
+      if (ghSettings.token) setGhToken(ghSettings.token);
+      if (ghSettings.owner) setGhOwner(ghSettings.owner);
+      if (ghSettings.repo) setGhRepo(ghSettings.repo);
+      if (bkSettings) setBohudurKey(bkSettings);
+      setSettingsLoaded(true);
+    };
+    loadExtra();
+  }, []);
+
+  if (!settings || !form.siteName || !settingsLoaded) return <div className="text-center py-16"><div className="spinner mx-auto"></div></div>;
 
   const handleExportCSV = () => {
     if (!form.siteName) return;
@@ -1171,6 +1221,45 @@ function SettingsTab({ settings, onSave }: {
     toast.success("JSON এক্সপোর্ট সম্পন্ন");
   };
 
+  const handlePasswordChange = async () => {
+    if (!currentPwd || !newPwd) { toast.error("সব ফিল্ড পূরণ করুন"); return; }
+    if (newPwd !== confirmPwd) { toast.error("নতুন পাসওয়ার্ড মিলছে না"); return; }
+    if (newPwd.length < 6) { toast.error("নতুন পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে"); return; }
+    setPwdLoading(true);
+    try {
+      await updateAdminPassword(currentPwd, newPwd);
+      toast.success("পাসওয়ার্ড সফলভাবে আপডেট হয়েছে");
+      setCurrentPwd(""); setNewPwd(""); setConfirmPwd("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "পাসওয়ার্ড আপডেট ব্যর্থ");
+    } finally { setPwdLoading(false); }
+  };
+
+  const handleGitHubSave = async () => {
+    setGhLoading(true);
+    try {
+      await updateSettingsGroup("settings/github", { token: ghToken, owner: ghOwner, repo: ghRepo });
+      toast.success("GitHub সেটিংস সংরক্ষিত হয়েছে");
+    } catch { toast.error("সংরক্ষণ ব্যর্থ"); } finally { setGhLoading(false); }
+  };
+
+  const handleBohudurSave = async () => {
+    setBohudurLoading(true);
+    try {
+      await updateSetting("settings/bohudur/apiKey", bohudurKey);
+      toast.success("Bohudur সেটিংস সংরক্ষিত হয়েছে");
+    } catch { toast.error("সংরক্ষণ ব্যর্থ"); } finally { setBohudurLoading(false); }
+  };
+
+  const handleBohudurTest = async () => {
+    if (!bohudurKey) { toast.error("API Key দিন"); return; }
+    setBohudurTestLoading(true);
+    try {
+      const result = await testBohudurConnection(bohudurKey);
+      if (result.success) { toast.success(result.message); } else { toast.error(result.message); }
+    } catch { toast.error("কানেকশন পরীক্ষা ব্যর্থ"); } finally { setBohudurTestLoading(false); }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -1178,6 +1267,62 @@ function SettingsTab({ settings, onSave }: {
         <p className="text-xs text-gray-400 mt-0.5">সাইট কনফিগারেশন পরিবর্তন করুন</p>
       </div>
 
+      {/* Password Change */}
+      <div className="bg-white rounded-2xl p-5 border border-gray-100 space-y-4">
+        <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2"><i className="bi bi-shield-lock mr-1.5 text-red-500"></i>পাসওয়ার্ড পরিবর্তন</h3>
+        <div className="space-y-3">
+          <div className="relative">
+            <FInput label="বর্তমান পাসওয়ার্ড" type="password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} placeholder="বর্তমান পাসওয়ার্ড" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FInput label="নতুন পাসওয়ার্ড" type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="কমপক্ষে ৬ অক্ষর" />
+            <FInput label="নতুন পাসওয়ার্ড নিশ্চিত করুন" type="password" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} placeholder="আবার লিখুন" />
+          </div>
+          <button onClick={handlePasswordChange} disabled={pwdLoading} className="h-10 px-6 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition-all disabled:opacity-50">
+            {pwdLoading ? <><div className="spinner spinner-sm inline-block mr-2 border-2 border-white/30 border-t-white"></div>আপডেট হচ্ছে...</> : <><i className="bi bi-key mr-1.5"></i>পাসওয়ার্ড আপডেট করুন</>}
+          </button>
+        </div>
+      </div>
+
+      {/* GitHub Image Upload Settings */}
+      <div className="bg-white rounded-2xl p-5 border border-gray-100 space-y-4">
+        <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2"><i className="bi bi-github mr-1.5 text-gray-800"></i>GitHub ইমেজ আপলোড সেটিংস</h3>
+        <p className="text-[11px] text-gray-400">স্পট ইমেজ GitHub রিপোতে আপলোড হবে</p>
+        <div className="space-y-3">
+          <FInput label="GitHub Personal Access Token" type="password" value={ghToken} onChange={e => setGhToken(e.target.value)} placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FInput label="Repository Owner" value={ghOwner} onChange={e => setGhOwner(e.target.value)} placeholder="mdmubarokhosin" />
+            <FInput label="Repository Name" value={ghRepo} onChange={e => setGhRepo(e.target.value)} placeholder="Free-Food-Map" />
+          </div>
+          <button onClick={handleGitHubSave} disabled={ghLoading} className="h-10 px-6 rounded-xl bg-gray-800 text-white text-xs font-bold hover:bg-gray-900 transition-all disabled:opacity-50">
+            {ghLoading ? <><div className="spinner spinner-sm inline-block mr-2 border-2 border-white/30 border-t-white"></div>সংরক্ষণ হচ্ছে...</> : <><i className="bi bi-check-lg mr-1.5"></i>সংরক্ষণ করুন</>}
+          </button>
+        </div>
+      </div>
+
+      {/* Bohudur Payment Settings */}
+      <div className="bg-white rounded-2xl p-5 border border-gray-100 space-y-4">
+        <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2"><i className="bi bi-credit-card-2-front mr-1.5 text-orange-500"></i>Bohudur পেমেন্ট সেটিংস</h3>
+        <p className="text-[11px] text-gray-400">অনুদান পেমেন্ট গেটওয়ে কনফিগারেশন</p>
+        <div className="space-y-3">
+          <div className="relative">
+            <FInput label="API Key" type={bohudurShowKey ? "text" : "password"} value={bohudurKey} onChange={e => setBohudurKey(e.target.value)} placeholder="Bohudur API Key" />
+            <button type="button" onClick={() => setBohudurShowKey(!bohudurShowKey)} className="absolute right-3 top-7 text-gray-400 hover:text-gray-600">
+              <i className={`bi ${bohudurShowKey ? "bi-eye-slash" : "bi-eye"} text-sm`}></i>
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={handleBohudurSave} disabled={bohudurLoading} className="h-10 px-6 rounded-xl bg-orange-500 text-white text-xs font-bold hover:bg-orange-600 transition-all disabled:opacity-50">
+              {bohudurLoading ? <><div className="spinner spinner-sm inline-block mr-2 border-2 border-white/30 border-t-white"></div>সংরক্ষণ হচ্ছে...</> : <><i className="bi bi-check-lg mr-1.5"></i>সংরক্ষণ করুন</>}
+            </button>
+            <button onClick={handleBohudurTest} disabled={bohudurTestLoading} className="h-10 px-4 rounded-xl border border-orange-300 text-xs font-bold text-orange-600 hover:bg-orange-50 transition-all disabled:opacity-50">
+              {bohudurTestLoading ? <><div className="spinner spinner-sm inline-block mr-2 border-2 border-orange-300 border-t-orange-500"></div>পরীক্ষা হচ্ছে...</> : <><i className="bi bi-lightning mr-1.5"></i>কানেকশন পরীক্ষা করুন</>}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* General Site Settings */}
       <div className="bg-white rounded-2xl p-5 border border-gray-100 space-y-4">
         <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-2"><i className="bi bi-globe mr-1.5 text-emerald-600"></i>সাধারণ সেটিংস</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1256,9 +1401,12 @@ function SpotFormModal({ modal, onClose, onSave }: { modal: { open: boolean; dat
   const [form, setForm] = useState({
     name: "", type: "daily_meal" as SpotType, address: "", area: "", city: "ঢাকা", country: "বাংলাদেশ",
     lat: 23.7596, lng: 90.379, openDays: [...DAY_ORDER] as string[], openTime: "12:00", closeTime: "14:00",
-    notes: "", startDate: "", endDate: "", autoDelete: false,
+    notes: "", startDate: "", endDate: "", autoDelete: false, image: "",
   });
   const [saving, setSaving] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useState<HTMLInputElement | null>(null)[0];
 
   useEffect(() => {
     if (modal.data) {
@@ -1267,13 +1415,39 @@ function SpotFormModal({ modal, onClose, onSave }: { modal: { open: boolean; dat
         city: modal.data.city, country: modal.data.country, lat: modal.data.lat, lng: modal.data.lng,
         openDays: modal.data.openDays, openTime: modal.data.openTime, closeTime: modal.data.closeTime,
         notes: modal.data.notes || "", startDate: modal.data.startDate || "", endDate: modal.data.endDate || "",
-        autoDelete: modal.data.autoDelete,
+        autoDelete: modal.data.autoDelete, image: (modal.data as any).image || "",
       });
+      if ((modal.data as any).image) setImagePreview((modal.data as any).image);
+    } else {
+      setImagePreview(null);
     }
   }, [modal.data]);
 
   const toggleDay = (day: string) => {
     setForm(f => ({ ...f, openDays: f.openDays.includes(day) ? f.openDays.filter(d => d !== day) : [...f.openDays, day] }));
+  };
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('শুধুমাত্র ইমেজ ফাইল আপলোড করুন'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('ফাইল সাইজ ৫MB এর বেশি হতে পারবে না'); return; }
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+    // Upload
+    setUploadingImage(true);
+    try {
+      const url = await uploadImageToGitHub(file);
+      setForm(f => ({ ...f, image: url }));
+      toast.success('ইমেজ আপলোড সফল!');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'ইমেজ আপলোড ব্যর্থ');
+      setImagePreview(null);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -1285,6 +1459,33 @@ function SpotFormModal({ modal, onClose, onSave }: { modal: { open: boolean; dat
   return (
     <Modal open={modal.open} onClose={onClose} title={modal.data ? "স্পট সম্পাদনা" : "নতুন স্পট যোগ করুন"} maxWidth="max-w-2xl">
       <div className="space-y-4">
+        {/* Image Upload */}
+        <div>
+          <label className="block text-xs font-bold text-gray-500 mb-1.5"><i className="bi bi-image mr-1.5 text-emerald-600"></i>স্পট ইমেজ</label>
+          <div className="relative">
+            {imagePreview ? (
+              <div className="relative rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+                <img src={imagePreview} alt="প্রিভিউ" className="w-full h-40 object-cover" />
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <label className="w-8 h-8 rounded-lg bg-black/50 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:bg-black/70 transition-colors">
+                    <i className="bi bi-pencil-fill text-white text-xs"></i>
+                    <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                  </label>
+                  <button onClick={() => { setImagePreview(null); setForm(f => ({ ...f, image: '' })); }}
+                    className="w-8 h-8 rounded-lg bg-red-500/80 backdrop-blur-sm flex items-center justify-center hover:bg-red-600 transition-colors">
+                    <i className="bi bi-trash3 text-white text-xs"></i>
+                  </button>
+                </div>
+                {uploadingImage && <div className="absolute inset-0 bg-black/30 flex items-center justify-center"><div className="spinner spinner-sm border-2 border-white/30 border-t-white"></div></div>}
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 cursor-pointer hover:bg-gray-100 hover:border-gray-300 transition-all">
+                {uploadingImage ? <div className="spinner spinner-sm border-2 border-gray-300 border-t-[#107539] mb-2"></div> : <><i className="bi bi-cloud-arrow-up text-2xl text-gray-300 mb-2"></i><span className="text-xs text-gray-400 font-medium">ক্লিক করে ইমেজ আপলোড করুন</span></>}
+                <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" disabled={uploadingImage} />
+              </label>
+            )}
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FInput label="স্পটের নাম *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="যেমন: কেন্দ্রীয় জামে মসজিদ ফ্রি ফুড" />
           <FSelect label="স্পট টাইপ" value={form.type} onChange={e => setForm({ ...form, type: e.target.value as SpotType })}>
