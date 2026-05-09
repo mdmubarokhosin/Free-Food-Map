@@ -5,6 +5,16 @@ import { toast } from "sonner";
 import type { SpotType } from "@/types";
 import { SPOT_TYPE_CONFIG } from "@/types";
 
+const WEEK_DAYS = [
+  { key: "saturday", label: "শনি" },
+  { key: "sunday", label: "রবি" },
+  { key: "monday", label: "সোম" },
+  { key: "tuesday", label: "মঙ্গল" },
+  { key: "wednesday", label: "বুধ" },
+  { key: "thursday", label: "বৃহ" },
+  { key: "friday", label: "শুক্র" },
+] as const;
+
 interface AddSpotModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,6 +26,9 @@ interface AddSpotModalProps {
     city: string;
     lat: number;
     lng: number;
+    openDays: string[];
+    openTime: string;
+    closeTime: string;
     notes?: string;
   }) => void | Promise<void>;
 }
@@ -27,6 +40,10 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
   const [lat, setLat] = useState("");
   const [lng, setLng] = useState("");
   const [notes, setNotes] = useState("");
+  const [openDays, setOpenDays] = useState<string[]>(["saturday","sunday","monday","tuesday","wednesday","thursday","friday"]);
+  const [openTime, setOpenTime] = useState("00:00");
+  const [closeTime, setCloseTime] = useState("23:59");
+  const [allDay, setAllDay] = useState(true);
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Array<{ name: string; lat: number; lng: number; display_name: string }>>([]);
   const [locationSearch, setLocationSearch] = useState("");
@@ -115,6 +132,11 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
       return;
     }
 
+    if (openDays.length === 0) {
+      setError("কমপক্ষে একটি খোলার দিন নির্বাচন করুন");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const result = onAdd({
@@ -125,6 +147,9 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
         city: "ঢাকা",
         lat: parseFloat(lat),
         lng: parseFloat(lng),
+        openDays: allDay ? ["saturday","sunday","monday","tuesday","wednesday","thursday","friday"] : openDays,
+        openTime: allDay ? "00:00" : openTime,
+        closeTime: allDay ? "23:59" : closeTime,
         notes: notes.trim() || undefined,
       });
       // Support both sync and async onAdd
@@ -138,6 +163,10 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
       setLat("");
       setLng("");
       setNotes("");
+      setOpenDays(["saturday","sunday","monday","tuesday","wednesday","thursday","friday"]);
+      setOpenTime("00:00");
+      setCloseTime("23:59");
+      setAllDay(true);
       setSearchResults([]);
       setLocationSearch("");
       setError("");
@@ -351,6 +380,104 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 </div>
               )}
             </div>
+
+            {/* Open Days */}
+            <div>
+              <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                <i className="bi bi-calendar-week text-[#107539] mr-1"></i>
+                খোলার দিন <span className="text-red-500">*</span>
+              </label>
+              <div className="flex items-center gap-2 mb-2">
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={allDay}
+                    onChange={(e) => {
+                      setAllDay(e.target.checked);
+                      if (e.target.checked) {
+                        setOpenDays(["saturday","sunday","monday","tuesday","wednesday","thursday","friday"]);
+                        setOpenTime("00:00");
+                        setCloseTime("23:59");
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-[#C1D3CD] accent-[#107539]"
+                  />
+                  <span className="text-xs font-medium text-[#0B411F]">সপ্তাহের সব দিন</span>
+                </label>
+              </div>
+              {!allDay && (
+                <div className="flex flex-wrap gap-1.5 animate-fade-in">
+                  {WEEK_DAYS.map((day) => {
+                    const isSelected = openDays.includes(day.key);
+                    return (
+                      <button
+                        key={day.key}
+                        type="button"
+                        onClick={() => {
+                          setOpenDays((prev) =>
+                            isSelected
+                              ? prev.filter((d) => d !== day.key)
+                              : [...prev, day.key]
+                          );
+                          setError("");
+                        }}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                          isSelected
+                            ? "bg-[#107539] text-white border-[#107539] shadow-sm"
+                            : "bg-white text-[#0B411F] border-[#C1D3CD] hover:border-[#107539] hover:bg-[#DBF0E3]"
+                        }`}
+                      >
+                        {day.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {allDay && (
+                <div className="flex flex-wrap gap-1.5">
+                  {WEEK_DAYS.map((day) => (
+                    <span
+                      key={day.key}
+                      className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#DBF0E3] text-[#107539] border border-[#107539]/20"
+                    >
+                      {day.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Open / Close Time */}
+            {!allDay && (
+              <div className="flex gap-3 animate-fade-in">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                    <i className="bi bi-clock text-[#107539] mr-1"></i>
+                    খোলার সময় <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    value={openTime}
+                    onChange={(e) => { setOpenTime(e.target.value); setError(""); }}
+                    className="form-input"
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-[#0B411F] mb-1">
+                    <i className="bi bi-clock-history text-[#107539] mr-1"></i>
+                    বন্ধের সময় <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    value={closeTime}
+                    onChange={(e) => { setCloseTime(e.target.value); setError(""); }}
+                    className="form-input"
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Notes */}
             <div>

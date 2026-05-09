@@ -95,15 +95,14 @@ export default function HomePage() {
   const handleAddSpot = useCallback(
     async (data: {
       name: string; type: SpotType; address: string; area: string;
-      city: string; lat: number; lng: number; notes?: string;
+      city: string; lat: number; lng: number;
+      openDays: string[]; openTime: string; closeTime: string;
+      notes?: string;
     }) => {
       try {
         const spotId = await createSpot({
           ...data,
           country: "বাংলাদেশ",
-          openDays: ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"],
-          openTime: "00:00",
-          closeTime: "23:59",
         });
         setShowAddModal(false);
         if (spotId) {
