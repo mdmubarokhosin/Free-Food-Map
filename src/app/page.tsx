@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { toast } from "sonner";
 import { subscribeToSpots, voteSpot, createSpot } from "@/lib/firebase-service";
 import type { Spot, SpotType } from "@/types";
 import { SPOT_TYPE_CONFIG } from "@/types";
@@ -97,7 +98,7 @@ export default function HomePage() {
       city: string; lat: number; lng: number; notes?: string;
     }) => {
       try {
-        await createSpot({
+        const spotId = await createSpot({
           ...data,
           country: "বাংলাদেশ",
           openDays: ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"],
@@ -105,8 +106,15 @@ export default function HomePage() {
           closeTime: "23:59",
         });
         setShowAddModal(false);
+        if (spotId) {
+          toast.success("স্পট সফলভাবে যোগ হয়েছে!", { description: "এডমিন যাচাইয়ের অপেক্ষায় আছে" });
+        } else {
+          toast.error("স্পট যোগ ব্যর্থ হয়েছে", { description: "আবার চেষ্টা করুন" });
+        }
       } catch (err) {
         console.error("Create spot failed:", err);
+        const msg = err instanceof Error ? err.message : "অজানা ত্রুটি";
+        toast.error("স্পট যোগ ব্যর্থ হয়েছে", { description: msg });
       }
     },
     []

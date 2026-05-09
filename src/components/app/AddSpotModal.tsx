@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import type { SpotType } from "@/types";
 import { SPOT_TYPE_CONFIG } from "@/types";
 
@@ -16,7 +17,7 @@ interface AddSpotModalProps {
     lat: number;
     lng: number;
     notes?: string;
-  }) => void;
+  }) => void | Promise<void>;
 }
 
 export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalProps) {
@@ -31,27 +32,37 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
   const [locationSearch, setLocationSearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const [error, setError] = useState("");
 
   const handleGPS = useCallback(() => {
     if (!navigator.geolocation) {
-      alert("আপনার ব্রাউজারে লোকেশন সাপোর্ট নেই");
+      toast.error("আপনার ব্রাউজারে লোকেশন সাপোর্ট নেই");
       return;
     }
     setSearching(true);
+    setError("");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setLat(pos.coords.latitude.toFixed(6));
         setLng(pos.coords.longitude.toFixed(6));
         setSearching(false);
+        toast.success("লোকেশন পাওয়া গেছে");
       },
       () => {
         fetch("https://ipapi.co/json/")
           .then((r) => r.json())
           .then((d) => {
-            setLat(d.latitude?.toFixed(6) || "");
-            setLng(d.longitude?.toFixed(6) || "");
+            if (d.latitude && d.longitude) {
+              setLat(d.latitude.toFixed(6));
+              setLng(d.longitude.toFixed(6));
+              toast.success("আইপি থেকে লোকেশন পাওয়া গেছে");
+            } else {
+              toast.error("লোকেশন পাওয়া যায়নি। এলাকা সার্চ ব্যবহার করুন।");
+            }
           })
-          .catch(() => {})
+          .catch(() => {
+            toast.error("লোকেশন পাওয়া যায়নি। ম্যানুয়ালি দিন।");
+          })
           .finally(() => setSearching(false));
       },
       { enableHighAccuracy: true, timeout: 15000 }
@@ -61,18 +72,25 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
   const handleLocationSearch = useCallback(async () => {
     if (!locationSearch.trim()) return;
     setSearching(true);
+    setError("");
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationSearch)}&countrycodes=bd&limit=5`
       );
       const data = await res.json();
-      setSearchResults(data.map((r: Record<string, string>) => ({
-        name: r.display_name?.split(",")[0] || "",
-        lat: parseFloat(r.lat),
-        lng: parseFloat(r.lon),
-        display_name: r.display_name || "",
-      })));
+      if (data.length === 0) {
+        toast.error("কোনো লোকেশন পাওয়া যায়নি");
+        setSearchResults([]);
+      } else {
+        setSearchResults(data.map((r: Record<string, string>) => ({
+          name: r.display_name?.split(",")[0] || "",
+          lat: parseFloat(r.lat),
+          lng: parseFloat(r.lon),
+          display_name: r.display_name || "",
+        })));
+      }
     } catch {
+      toast.error("সার্চ ব্যর্থ হয়েছে");
       setSearchResults([]);
     }
     setSearching(false);
@@ -81,11 +99,25 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (honeypot) return;
-    if (!name.trim() || !area.trim() || !lat || !lng) return;
+    setError("");
+
+    // Validation
+    if (!name.trim()) {
+      setError("স্থানের নাম দিন");
+      return;
+    }
+    if (!area.trim()) {
+      setError("এলাকা / মহল্লা দিন");
+      return;
+    }
+    if (!lat || !lng || isNaN(parseFloat(lat)) || isNaN(parseFloat(lng))) {
+      setError("লোকেশন নির্বাচন করুন (GPS বা সার্চ ব্যবহার করুন)");
+      return;
+    }
 
     setSubmitting(true);
     try {
-      await onAdd({
+      const result = onAdd({
         name: name.trim(),
         type,
         address: area.trim(),
@@ -95,6 +127,11 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
         lng: parseFloat(lng),
         notes: notes.trim() || undefined,
       });
+      // Support both sync and async onAdd
+      if (result instanceof Promise) {
+        await result;
+      }
+      // Success — reset form and close
       setName("");
       setArea("");
       setType("daily_meal");
@@ -103,6 +140,12 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
       setNotes("");
       setSearchResults([]);
       setLocationSearch("");
+      setError("");
+    } catch (err) {
+      console.error("AddSpotModal error:", err);
+      const msg = err instanceof Error ? err.message : "অজানা ত্রুটি";
+      setError(msg);
+      toast.error("স্পট যোগ ব্যর্থ হয়েছে", { description: msg });
     } finally {
       setSubmitting(false);
     }
@@ -115,9 +158,9 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-md" onClick={onClose} />
 
-      {/* Modal — Extra rounded like reference */}
+      {/* Modal */}
       <div className="relative w-full max-w-lg mx-0 sm:mx-4 mb-0 bg-white rounded-[2.5rem] sm:rounded-[2.5rem] shadow-2xl animate-slide-up sm:animate-fade-in-scale max-h-[90vh] overflow-y-auto custom-scrollbar">
-        {/* Decorative circle at top-right */}
+        {/* Decorative circles */}
         <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full gradient-primary-green opacity-10" />
         <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full gradient-orange-fab opacity-10" />
 
@@ -140,6 +183,14 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
             <p className="text-xs text-[#93796C] mt-1">বিনামূল্যে খাবার বিতরণের স্থান তথ্য দিন</p>
           </div>
 
+          {/* Error message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 animate-fade-in">
+              <i className="bi bi-exclamation-circle-fill text-red-500 text-sm"></i>
+              <p className="text-xs text-red-600 font-medium">{error}</p>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <input type="text" name="website" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} className="hidden" tabIndex={-1} autoComplete="off" />
@@ -153,7 +204,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => { setName(e.target.value); setError(""); }}
                 placeholder="যেমন: মসজিদুল ফালাহ কমিউনিটি সেন্টার"
                 maxLength={100}
                 required
@@ -170,7 +221,7 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
               <input
                 type="text"
                 value={area}
-                onChange={(e) => setArea(e.target.value)}
+                onChange={(e) => { setArea(e.target.value); setError(""); }}
                 placeholder="যেমন: ধানমন্ডি ২৭"
                 maxLength={100}
                 required
@@ -207,20 +258,30 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 <input
                   type="text"
                   value={lat}
-                  onChange={(e) => setLat(e.target.value)}
-                  placeholder="অক্ষাংশ (lat)"
                   readOnly
-                  className="form-input"
+                  placeholder="অক্ষাংশ (lat)"
+                  className={`form-input ${lat ? "border-green-400 bg-green-50/50" : ""}`}
                 />
                 <input
                   type="text"
                   value={lng}
-                  onChange={(e) => setLng(e.target.value)}
-                  placeholder="দ্রাঘিমাংশ (lng)"
                   readOnly
-                  className="form-input"
+                  placeholder="দ্রাঘিমাংশ (lng)"
+                  className={`form-input ${lng ? "border-green-400 bg-green-50/50" : ""}`}
                 />
               </div>
+              {lat && lng && (
+                <div className="flex items-center gap-1 mb-2 text-[10px] text-green-600 animate-fade-in">
+                  <i className="bi bi-check-circle-fill"></i>
+                  <span>লোকেশন নির্বাচিত হয়েছে</span>
+                </div>
+              )}
+              {!lat && !lng && (
+                <div className="flex items-center gap-1 mb-2 text-[10px] text-amber-600">
+                  <i className="bi bi-exclamation-circle"></i>
+                  <span>নিচের বাটন থেকে লোকেশন নির্বাচন করুন</span>
+                </div>
+              )}
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -237,8 +298,10 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 <button
                   type="button"
                   onClick={() => {
-                    const url = `https://www.google.com/maps?q=${lat},${lng}`;
-                    window.open(url, "_blank");
+                    if (lat && lng) {
+                      const url = `https://www.google.com/maps?q=${lat},${lng}`;
+                      window.open(url, "_blank");
+                    }
                   }}
                   disabled={!lat || !lng}
                   className="px-3 py-2 rounded-xl bg-secondary text-sm font-semibold transition-all disabled:opacity-50 hover:bg-[#EAE2D7]"
@@ -259,9 +322,10 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                 <button
                   type="button"
                   onClick={handleLocationSearch}
-                  className="px-3 py-2 rounded-lg gradient-primary-green text-white text-xs font-semibold hover:opacity-90 transition-all"
+                  disabled={searching}
+                  className="px-3 py-2 rounded-lg gradient-primary-green text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-50"
                 >
-                  খুঁজুন
+                  {searching ? <div className="spinner spinner-sm border-2 border-white/30 border-t-white"></div> : "খুঁজুন"}
                 </button>
               </div>
 
@@ -275,7 +339,9 @@ export default function AddSpotModal({ isOpen, onClose, onAdd }: AddSpotModalPro
                         setLat(r.lat.toFixed(6));
                         setLng(r.lng.toFixed(6));
                         setSearchResults([]);
+                        setError("");
                         if (!area) setArea(r.name);
+                        toast.success("লোকেশন নির্বাচিত হয়েছে");
                       }}
                       className="w-full text-left px-3 py-2 rounded-lg text-xs hover:bg-[#DBF0E3] transition-colors border border-[#EAE2D7]"
                     >
