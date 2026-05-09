@@ -84,8 +84,17 @@ export async function createSpot(spotData: {
   const spotsRef = ref(database, 'spots');
   const newSpotRef = push(spotsRef);
   const now = Date.now();
+
+  // Strip undefined values — Firebase set() rejects undefined properties
+  const cleanData: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(spotData)) {
+    if (value !== undefined) {
+      cleanData[key] = value;
+    }
+  }
+
   await set(newSpotRef, {
-    ...spotData,
+    ...cleanData,
     verified: false,
     active: true,
     createdAt: now,
@@ -99,7 +108,14 @@ export async function createSpot(spotData: {
 
 export async function updateSpot(id: string, data: Partial<Spot>): Promise<void> {
   const spotRef = ref(database, `spots/${id}`);
-  await update(spotRef, { ...data, lastUpdated: Date.now() });
+  // Strip undefined values — Firebase rejects undefined properties
+  const cleanData: Record<string, unknown> = { lastUpdated: Date.now() };
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined) {
+      cleanData[key] = value;
+    }
+  }
+  await update(spotRef, cleanData);
 }
 
 export async function deleteSpot(id: string): Promise<void> {
