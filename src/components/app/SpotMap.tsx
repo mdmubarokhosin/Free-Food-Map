@@ -49,7 +49,7 @@ function toBn(n: number): string {
   return String(n).replace(/\d/g, (d) => bnDigits[parseInt(d)]);
 }
 
-// Create the map legend control
+// Create the map legend control (collapsible)
 function createMapLegend(): L.Control {
   const LegendControl = L.Control.extend({
     options: { position: "bottomleft" as L.ControlPosition },
@@ -57,11 +57,16 @@ function createMapLegend(): L.Control {
     onAdd: function (this: { _map: L.Map; _div?: HTMLElement }) {
       const div = L.DomUtil.create("div", "map-legend");
       div.innerHTML = `
-        <div class="legend-title">স্পটের ধরন</div>
-        <div class="legend-item"><span class="legend-emoji">🍛</span> দৈনিক খাবার</div>
-        <div class="legend-item"><span class="legend-emoji">🍚</span> সাপ্তাহিক খাবার</div>
-        <div class="legend-item"><span class="legend-emoji">🥬</span> গ্রোসারি</div>
-        <div class="legend-item"><span class="legend-emoji">🍽️</span> স্যুপ কিচেন</div>
+        <div class="legend-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;" onclick="this.parentElement.classList.toggle('collapsed')">
+          <span>স্পটের ধরন</span>
+          <span style="font-size:10px;opacity:0.6;">▼</span>
+        </div>
+        <div class="legend-items">
+          <div class="legend-item"><span class="legend-emoji">🍛</span> দৈনিক খাবার</div>
+          <div class="legend-item"><span class="legend-emoji">🍚</span> সাপ্তাহিক খাবার</div>
+          <div class="legend-item"><span class="legend-emoji">🥬</span> গ্রোসারি</div>
+          <div class="legend-item"><span class="legend-emoji">🍽️</span> স্যুপ কিচেন</div>
+        </div>
       `;
       return div;
     },
@@ -91,11 +96,18 @@ export default function SpotMap({
       zoom: 11,
       zoomControl: true,
       attributionControl: true,
+      scrollWheelZoom: true,
+      dragging: true,
+      doubleClickZoom: true,
+      touchZoom: true,
+      boxZoom: true,
+      keyboard: true,
     });
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
+      crossOrigin: "anonymous",
     }).addTo(map);
 
     markersRef.current = L.layerGroup().addTo(map);

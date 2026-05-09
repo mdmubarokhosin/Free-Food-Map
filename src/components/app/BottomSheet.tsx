@@ -26,21 +26,29 @@ function formatTimeAgo(timestamp: number): string {
   const diff = Date.now() - timestamp;
   const mins = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(diff / 86400000);
 
   if (mins < 1) return "এইমাত্র";
   if (mins < 60) return `${toBn(mins)} মিনিট আগে`;
-  if (hours < 24) return `${toBn(hours)} ঘন্টা আগে`;
 
-  // Check if yesterday
+  // Check relative days
   const spotDate = new Date(timestamp);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const spotDay = new Date(spotDate);
+  spotDay.setHours(0, 0, 0, 0);
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  if (spotDate >= yesterday.getTime()) return "গতকাল";
-  if (days < 7) return `${toBn(days)} দিন আগে`;
+  if (spotDay.getTime() === today.getTime()) return "আজ";
+  if (spotDay.getTime() === yesterday.getTime()) return "গতকাল";
+
+  // Show day name for this week
+  const dayNames = ["রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার", "শনিবার"];
+  const dayDiff = Math.floor((today.getTime() - spotDay.getTime()) / 86400000);
+  if (dayDiff > 0 && dayDiff < 7) return dayNames[spotDate.getDay()];
+
+  if (hours < 24) return `${toBn(hours)} ঘন্টা আগে`;
+  const days = Math.floor(diff / 86400000);
   return `${toBn(days)} দিন আগে`;
 }
 

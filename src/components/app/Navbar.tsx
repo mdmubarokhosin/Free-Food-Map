@@ -95,6 +95,7 @@ export default function Navbar({
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="flex items-center justify-center w-9 h-9 rounded-lg border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all duration-200"
+                  aria-label="মেনু"
                 >
                   {mobileMenuOpen ? (
                     <i className="bi bi-x-lg text-sm text-teal-600" />
@@ -184,13 +185,13 @@ export default function Navbar({
 
           {/* Search bar - desktop only */}
           <div className="hidden lg:block flex-1 relative">
-            <i className="bi bi-search text-sm text-emerald-600 absolute left-3 top-1/2 -translate-y-1/2" />
+            <i className="bi bi-search text-sm text-teal-600 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="স্পট বা এলাকা খুঁজুন…"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-8 pr-8 py-2.5 rounded-xl text-sm shadow-md focus:outline-none focus:ring-2 bg-white border border-green-200 text-green-900 focus:ring-emerald-500/50"
+              className="w-full pl-8 pr-8 py-2.5 rounded-xl text-sm shadow-md focus:outline-none focus:ring-2 bg-white border border-teal-200 text-foreground focus:ring-teal-500/50"
             />
           </div>
 
@@ -205,16 +206,16 @@ export default function Navbar({
             </Link>
             <Link
               href="/dev-info"
-              className="flex items-center gap-1.5 px-2 py-2 rounded-xl shadow-md bg-white border border-green-200 transition-all active:scale-95 hover:shadow-lg hover:-translate-y-0.5"
+              className="flex items-center gap-1.5 px-2 py-2 rounded-xl shadow-md bg-white border border-teal-200 transition-all active:scale-95 hover:shadow-lg hover:-translate-y-0.5"
             >
-              <i className="bi bi-book text-xs text-emerald-600" />
-              <span className="text-xs font-bold text-emerald-600">ব্লগ</span>
+              <i className="bi bi-info-circle text-xs text-teal-600" />
+              <span className="text-xs font-bold text-teal-600">তথ্য</span>
             </Link>
             <Link
               href="/status"
-              className="flex items-center justify-center px-2 py-2 rounded-xl shadow-md bg-white border border-green-200 transition-all active:scale-95 hover:shadow-lg hover:-translate-y-0.5"
+              className="flex items-center justify-center px-2 py-2 rounded-xl shadow-md bg-white border border-teal-200 transition-all active:scale-95 hover:shadow-lg hover:-translate-y-0.5"
             >
-              <i className="bi bi-info-circle text-xs text-emerald-600" />
+              <i className="bi bi-bar-chart text-xs text-teal-600" />
             </Link>
           </nav>
 
@@ -223,20 +224,22 @@ export default function Navbar({
             {/* Mobile search toggle */}
             <button
               onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-              className="flex items-center justify-center w-10 h-10 rounded-xl shadow-md bg-white border border-green-200 transition-all active:scale-95"
+              className="flex items-center justify-center w-10 h-10 rounded-xl shadow-md bg-white border border-teal-200 transition-all active:scale-95"
+              aria-label="খুঁজুন"
             >
-              <i className="bi bi-search text-sm text-emerald-600" />
+              <i className="bi bi-search text-sm text-teal-600" />
             </button>
 
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex items-center justify-center w-10 h-10 rounded-xl shadow-md bg-white border border-green-200 transition-all active:scale-95"
+              className="flex items-center justify-center w-10 h-10 rounded-xl shadow-md bg-white border border-teal-200 transition-all active:scale-95"
+              aria-label="মেনু"
             >
               {mobileMenuOpen ? (
-                <i className="bi bi-x-lg text-sm text-emerald-600" />
+                <i className="bi bi-x-lg text-sm text-teal-600" />
               ) : (
-                <i className="bi bi-list text-sm text-emerald-600" />
+                <i className="bi bi-list text-sm text-teal-600" />
               )}
             </button>
           </div>
@@ -246,58 +249,18 @@ export default function Navbar({
         {mobileSearchOpen && (
           <div className="mt-2 px-1 pointer-events-auto">
             <div className="relative">
-              <i className="bi bi-search text-sm text-emerald-600 absolute left-3 top-1/2 -translate-y-1/2" />
+              <i className="bi bi-search text-sm text-teal-600 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="স্পট বা এলাকা খুঁজুন…"
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
                 autoFocus
-                className="w-full pl-8 pr-8 py-2.5 rounded-xl text-sm shadow-md focus:outline-none focus:ring-2 bg-white border border-green-200 text-green-900 focus:ring-emerald-500/50"
+                className="w-full pl-8 pr-8 py-2.5 rounded-xl text-sm shadow-md focus:outline-none focus:ring-2 bg-white border border-teal-200 text-foreground focus:ring-teal-500/50"
               />
             </div>
           </div>
         )}
-
-        {/* Stats badges */}
-        <div className="flex items-center gap-2 mt-2 px-1 pointer-events-auto">
-          <span className="text-xs font-bold px-2.5 py-1 rounded-full shadow-sm bg-gradient-to-r from-emerald-600 to-green-500 text-white">
-            🍛 সর্বমোট স্পট: {toBn(totalSpots)}টি
-          </span>
-          <span className="text-xs font-bold px-2.5 py-1 rounded-full shadow-sm bg-emerald-50 text-emerald-700">
-            <i className="bi bi-patch-check-fill text-[10px]"></i> নিশ্চিত: {toBn(verifiedSpots)}টি
-          </span>
-        </div>
-
-        {/* Info bar - food related info */}
-        <div className="mt-2 px-1 pointer-events-auto">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl shadow-md bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-700 border border-emerald-500">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="flex flex-col items-center flex-shrink-0">
-                <span className="text-[10px] text-white/70 font-medium leading-none">ফ্রি ফুড</span>
-                <span className="text-lg font-black text-white leading-tight">🍽️</span>
-                <span className="text-[9px] text-white/60 leading-none">(ম্যাপ)</span>
-              </div>
-              <div className="w-px h-8 bg-white/20" />
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <i className="bi bi-geo-alt-fill text-base text-white"></i>
-                <div className="flex flex-col">
-                  <span className="text-[9px] text-white/70 leading-none">সক্রিয় স্পট</span>
-                  <span className="text-sm font-bold text-white leading-tight">{toBn(totalSpots)}টি</span>
-                </div>
-              </div>
-              <div className="w-px h-8 bg-white/20" />
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <i className="bi bi-check-circle-fill text-base text-yellow-300"></i>
-                <div className="flex flex-col">
-                  <span className="text-[9px] text-white/70 leading-none">ভেরিফাইড</span>
-                  <span className="text-sm font-bold text-yellow-200 leading-tight">{toBn(verifiedSpots)}টি</span>
-                </div>
-              </div>
-            </div>
-            <i className="bi bi-hand-index text-lg text-white/60 flex-shrink-0"></i>
-          </div>
-        </div>
       </header>
 
       {/* Mobile dropdown menu */}
@@ -309,50 +272,50 @@ export default function Navbar({
           />
           <div
             ref={menuRef}
-            className="absolute top-[180px] right-3 z-[1003] w-52 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden lg:hidden"
+            className="absolute top-[72px] right-3 z-[1003] w-52 bg-white dark:bg-stone-900 rounded-2xl shadow-xl border border-stone-200/60 dark:border-stone-700/40 overflow-hidden lg:hidden animate-fade-in-scale"
           >
             <Link
               href="/donate"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
             >
-              <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
-                <i className="bi bi-heart text-xs text-red-500" />
+              <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center">
+                <i className="bi bi-heart text-xs text-orange-500" />
               </div>
-              <span className="text-sm font-medium text-red-600">দান করুন</span>
+              <span className="text-sm font-medium text-orange-600">দান করুন</span>
             </Link>
             <Link
               href="/dev-info"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors"
             >
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <i className="bi bi-book text-xs text-emerald-600" />
+              <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center">
+                <i className="bi bi-info-circle text-xs text-teal-600" />
               </div>
-              <span className="text-sm font-medium text-gray-800">ব্লগ</span>
+              <span className="text-sm font-medium">তথ্য</span>
             </Link>
             <Link
               href="/status"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-emerald-50 transition-colors"
+              className="flex items-center gap-3 px-4 py-3 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-colors"
             >
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <i className="bi bi-info-circle text-xs text-emerald-600" />
+              <div className="w-8 h-8 rounded-lg bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center">
+                <i className="bi bi-bar-chart text-xs text-teal-600" />
               </div>
-              <span className="text-sm font-medium text-gray-800">তথ্য</span>
+              <span className="text-sm font-medium">পরিসংখ্যান</span>
             </Link>
-            <div className="border-t border-gray-100">
+            <div className="border-t border-stone-100 dark:border-stone-700/50">
               <button
                 onClick={() => {
                   setMobileMenuOpen(false);
                   onAddSpot();
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-emerald-50 hover:bg-emerald-100 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-3 bg-teal-50 dark:bg-teal-900/20 hover:bg-teal-100 dark:hover:bg-teal-900/30 transition-colors"
               >
-                <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
                   <i className="bi bi-plus-lg text-xs text-white" />
                 </div>
-                <span className="text-sm font-bold text-emerald-700">স্পট যোগ করুন</span>
+                <span className="text-sm font-bold text-teal-700 dark:text-teal-400">স্পট যোগ করুন</span>
               </button>
             </div>
           </div>

@@ -49,6 +49,22 @@ export default function DevInfoPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+        {/* About - anchor: about (moved to top) */}
+        <div id="about" className="bg-card rounded-2xl p-6 border border-stone-200/60 dark:border-stone-700/40 text-center hover:shadow-lg transition-all duration-300">
+          <h2 className="text-lg font-bold text-foreground mb-3">আমাদের সম্পর্কে</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            ফ্রি ফুড ম্যাপ একটি কমিউনিটি-চালিত প্রকল্প যার লক্ষ্য হল বাংলাদেশে বিনামূল্যে খাবার বিতরণের
+            স্থানগুলো সহজে খুঁজে পাওয়া। যেকেউ নতুন স্পট যোগ করতে পারে এবং কমিউনিটি ভোটিং এর মাধ্যমে
+            স্পটগুলো যাচাই করা হয়। আমাদের লক্ষ্য হল কোনো মানুষ না খেয়ে থাকবে না।
+          </p>
+          <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
+            <span className="px-3 py-1 rounded-full bg-secondary text-xs font-medium">Next.js 16</span>
+            <span className="px-3 py-1 rounded-full bg-secondary text-xs font-medium">Firebase</span>
+            <span className="px-3 py-1 rounded-full bg-secondary text-xs font-medium">Leaflet</span>
+            <span className="px-3 py-1 rounded-full bg-secondary text-xs font-medium">Tailwind CSS</span>
+          </div>
+        </div>
+
         {/* How it Works - anchor: how-it-works */}
         <div id="how-it-works">
           <h2 className="text-xl font-bold text-foreground mb-4 text-center">বৈশিষ্ট্যসমূহ</h2>
@@ -92,22 +108,6 @@ export default function DevInfoPage() {
                 টিম সদস্য শীঘ্রই যোগ হবে
               </div>
             )}
-          </div>
-        </div>
-
-        {/* About - anchor: about */}
-        <div id="about" className="bg-card rounded-2xl p-6 border border-stone-200/60 dark:border-stone-700/40 text-center hover:shadow-lg transition-all duration-300">
-          <h2 className="text-lg font-bold text-foreground mb-3">আমাদের সম্পর্কে</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            ফ্রি ফুড ম্যাপ একটি কমিউনিটি-চালিত প্রকল্প যার লক্ষ্য হল বাংলাদেশে বিনামূল্যে খাবার বিতরণের
-            স্থানগুলো সহজে খুঁজে পাওয়া। যেকেউ নতুন স্পট যোগ করতে পারে এবং কমিউনিটি ভোটিং এর মাধ্যমে
-            স্পটগুলো যাচাই করা হয়। আমাদের লক্ষ্য হল কোনো মানুষ না খেয়ে থাকবে না।
-          </p>
-          <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
-            <span className="px-3 py-1 rounded-full bg-secondary text-xs font-medium">Next.js 16</span>
-            <span className="px-3 py-1 rounded-full bg-secondary text-xs font-medium">Firebase</span>
-            <span className="px-3 py-1 rounded-full bg-secondary text-xs font-medium">Leaflet</span>
-            <span className="px-3 py-1 rounded-full bg-secondary text-xs font-medium">Tailwind CSS</span>
           </div>
         </div>
 

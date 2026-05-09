@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { fetchSpot, fetchReviews, addReview, incrementViewCount } from "@/lib/firebase-service";
 import type { Spot, Review } from "@/types";
-import { SPOT_TYPE_CONFIG } from "@/types";
+import { SPOT_TYPE_CONFIG, DAY_LABELS } from "@/types";
 
 function SpotDetailContent() {
   const searchParams = useSearchParams();
@@ -14,6 +14,12 @@ function SpotDetailContent() {
   const [loading, setLoading] = useState(true);
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
   const [submitting, setSubmitting] = useState(false);
+
+  // Bengali number converter
+  function toBn(n: number): string {
+    const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+    return String(n).replace(/[0-9]/g, (c) => d[parseInt(c)]);
+  }
 
   useEffect(() => {
     if (!spotId) return;
@@ -55,13 +61,18 @@ function SpotDetailContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="text-white py-10 px-4 text-center bg-gradient-to-r from-orange-500 via-rose-500 to-pink-500">
-        <span className="text-4xl">{config.emoji}</span>
-        <h1 className="text-2xl font-bold mt-2">{spot.name}</h1>
-        <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
-          <span className="px-2 py-0.5 rounded-full bg-white/20 text-xs font-semibold">{config.label}</span>
-          {spot.verified && <span className="px-2 py-0.5 rounded-full bg-green-500 text-xs font-bold flex items-center gap-1"><i className="bi bi-patch-check-fill text-[10px]"></i> নিশ্চিত</span>}
-          {spot.active ? <span className="px-2 py-0.5 rounded-full bg-green-500/80 text-xs font-bold">সক্রিয়</span> : <span className="px-2 py-0.5 rounded-full bg-red-500/80 text-xs font-bold">নিষ্ক্রিয়</span>}
+      <div className="text-white py-10 px-4 text-center bg-gradient-to-r from-teal-600 via-emerald-600 to-teal-700 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <i className="bi bi-cup-hot-fill absolute top-2 right-6 text-8xl text-white rotate-12"></i>
+        </div>
+        <div className="relative">
+          <span className="text-4xl">{config.emoji}</span>
+          <h1 className="text-2xl font-bold mt-2">{spot.name}</h1>
+          <div className="flex items-center justify-center gap-2 mt-2 flex-wrap">
+            <span className="px-2 py-0.5 rounded-full bg-white/20 text-xs font-semibold">{config.label}</span>
+            {spot.verified && <span className="px-2 py-0.5 rounded-full bg-green-500 text-xs font-bold flex items-center gap-1"><i className="bi bi-patch-check-fill text-[10px]"></i> নিশ্চিত</span>}
+            {spot.active ? <span className="px-2 py-0.5 rounded-full bg-green-500/80 text-xs font-bold">সক্রিয়</span> : <span className="px-2 py-0.5 rounded-full bg-red-500/80 text-xs font-bold">নিষ্ক্রিয়</span>}
+          </div>
         </div>
       </div>
 
@@ -78,7 +89,7 @@ function SpotDetailContent() {
           </div>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground"><i className="bi bi-calendar3"></i></span>
-            <span className="text-foreground">সপ্তাহের দিন: {spot.openDays.length === 7 ? "প্রতিদিন" : spot.openDays.join(", ")}</span>
+            <span className="text-foreground">সপ্তাহের দিন: {spot.openDays.length === 7 ? "প্রতিদিন" : spot.openDays.map((d) => DAY_LABELS[d] || d).join(", ")}</span>
           </div>
           {spot.notes && (
             <div className="flex items-start gap-2 text-sm">
@@ -88,11 +99,11 @@ function SpotDetailContent() {
           )}
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground"><i className="bi bi-people"></i></span>
-            <span className="text-foreground">ভোট: <i className="bi bi-hand-thumbs-up text-green-500"></i> {spot.positiveVotes} / <i className="bi bi-hand-thumbs-down text-red-500"></i> {spot.negativeVotes}</span>
+            <span className="text-foreground">ভোট: <i className="bi bi-hand-thumbs-up text-green-500"></i> {toBn(spot.positiveVotes)} / <i className="bi bi-hand-thumbs-down text-red-500"></i> {toBn(spot.negativeVotes)}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground"><i className="bi bi-eye"></i></span>
-            <span className="text-foreground">{spot.viewCount || 0} বার দেখা হয়েছে</span>
+            <span className="text-foreground">{toBn(spot.viewCount || 0)} বার দেখা হয়েছে</span>
           </div>
           {spot.lat && spot.lng && (
             <div className="pt-2 flex gap-2">
@@ -142,7 +153,7 @@ function SpotDetailContent() {
           <form onSubmit={handleReview} className="space-y-3 mb-6 p-4 rounded-xl bg-secondary/20">
             <input placeholder="আপনার নাম *" value={reviewForm.name}
               onChange={(e) => setReviewForm({ ...reviewForm, name: e.target.value })} required
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="form-input" />
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">রেটিং:</span>
               {[1, 2, 3, 4, 5].map((s) => (
@@ -154,7 +165,7 @@ function SpotDetailContent() {
             </div>
             <textarea placeholder="আপনার মতামত..." value={reviewForm.comment}
               onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })} rows={2}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              className="form-input resize-none" />
             <button type="submit" disabled={submitting}
               className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-sm disabled:opacity-50 hover:shadow-md transition-all">
               {submitting ? "সংরক্ষণ হচ্ছে..." : "রিভিউ দিন"}
