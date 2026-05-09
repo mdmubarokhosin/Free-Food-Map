@@ -152,20 +152,30 @@ export default function HomePage() {
 
           {/* Right section */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Live Badge */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-teal-50/80 text-teal-700 text-xs font-semibold border border-teal-200/50 shadow-sm">
-              <span className="live-dot"></span>
-              <span className="hidden sm:inline">সরাসরি</span>
+            {/* Live Badge - smaller, less prominent */}
+            <div className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-full bg-teal-50/60 text-teal-600 text-[10px] font-medium">
+              <span className="live-dot" style={{width:'6px',height:'6px'}}></span>
+              <span>সরাসরি</span>
             </div>
 
-            {/* Admin link */}
+            {/* Primary CTA: Add Spot */}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white text-xs font-bold hover:shadow-lg hover:shadow-teal-300/30 active:scale-95 transition-all duration-200 ring-1 ring-white/20"
+            >
+              <i className="bi bi-plus-lg text-sm"></i>
+              <span className="hidden sm:inline">স্পট যোগ করুন</span>
+              <span className="sm:hidden">যোগ</span>
+            </button>
+
+            {/* Admin link - secondary/hidden */}
             <a
               href="/admin"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/80 text-teal-700 border border-teal-200/50 hover:bg-white hover:shadow-md transition-all duration-200"
+              className="hidden sm:flex items-center gap-1 px-2 py-1.5 rounded-lg text-muted-foreground hover:text-teal-600 hover:bg-secondary transition-all duration-200"
               title="এডমিন"
+              aria-label="এডমিন প্যানেল"
             >
-              <i className="bi bi-gear-fill text-sm"></i>
-              <span className="hidden sm:inline text-xs font-medium">এডমিন</span>
+              <i className="bi bi-gear text-sm"></i>
             </a>
           </div>
         </div>
@@ -186,14 +196,6 @@ export default function HomePage() {
             <p className="text-xs text-[#78716C] dark:text-stone-400 mt-1">স্পট খুঁজে আনা হচ্ছে</p>
           </div>
         )}
-
-        {/* Spot Counter Overlay */}
-        <div className="absolute top-3 left-3 z-[1000]">
-          <div className="card-glass flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-[#1C1917] dark:text-stone-200 text-sm font-semibold">
-            <i className="bi bi-geo-alt-fill text-sm text-teal-600 dark:text-teal-400"></i>
-            <span>সর্বমোট: {toBn(activeCount)} · নতুন: {toBn(todayCount)} · নিশ্চিত: {toBn(verifiedCount)}</span>
-          </div>
-        </div>
 
         {/* Map */}
         <SpotMap
@@ -243,13 +245,11 @@ export default function HomePage() {
             <span>ফ্রি ফুড ম্যাপ &copy; {new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-2 text-[11px] text-stone-500 flex-wrap">
-            <a href="/dev-info" className="hover:text-teal-300 transition-colors duration-200">আমাদের সম্পর্কে</a>
+            <a href="/dev-info#about" className="hover:text-teal-300 transition-colors duration-200">আমাদের সম্পর্কে</a>
             <span className="text-stone-700">·</span>
-            <a href="/dev-info" className="hover:text-teal-300 transition-colors duration-200">কিভাবে কাজ করে</a>
+            <a href="/dev-info#how-it-works" className="hover:text-teal-300 transition-colors duration-200">কিভাবে কাজ করে</a>
             <span className="text-stone-700">·</span>
-            <a href="/dev-info" className="hover:text-teal-300 transition-colors duration-200">যোগাযোগ</a>
-            <span className="text-stone-700">·</span>
-            <a href="/admin" className="hover:text-teal-300 transition-colors duration-200">এডমিন</a>
+            <a href="/dev-info#contact" className="hover:text-teal-300 transition-colors duration-200">যোগাযোগ</a>
           </div>
         </div>
       </footer>

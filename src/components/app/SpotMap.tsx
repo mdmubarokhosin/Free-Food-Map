@@ -208,7 +208,7 @@ export default function SpotMap({
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <a href="https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}" target="_blank" rel="noopener"
                  style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;background:#0D9488;color:white;font-size:12px;text-decoration:none;font-weight:600;">
-                <i class="bi bi-cursor-fill" style="font-size:11px;"></i> দিকনির্দেশনা
+                <i class="bi bi-compass-fill" style="font-size:11px;"></i> দিকনির্দেশনা
               </a>
               ${!isVoted ? `
               <button onclick="window.dispatchEvent(new CustomEvent('popupVote',{detail:{id:'${spot.id}',type:'true'}}))"

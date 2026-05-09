@@ -49,8 +49,8 @@ export default function DevInfoPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-        {/* Features */}
-        <div>
+        {/* How it Works - anchor: how-it-works */}
+        <div id="how-it-works">
           <h2 className="text-xl font-bold text-foreground mb-4 text-center">বৈশিষ্ট্যসমূহ</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[
@@ -95,8 +95,8 @@ export default function DevInfoPage() {
           </div>
         </div>
 
-        {/* About */}
-        <div className="bg-card rounded-2xl p-6 border border-stone-200/60 dark:border-stone-700/40 text-center hover:shadow-lg transition-all duration-300">
+        {/* About - anchor: about */}
+        <div id="about" className="bg-card rounded-2xl p-6 border border-stone-200/60 dark:border-stone-700/40 text-center hover:shadow-lg transition-all duration-300">
           <h2 className="text-lg font-bold text-foreground mb-3">আমাদের সম্পর্কে</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             ফ্রি ফুড ম্যাপ একটি কমিউনিটি-চালিত প্রকল্প যার লক্ষ্য হল বাংলাদেশে বিনামূল্যে খাবার বিতরণের
@@ -111,8 +111,8 @@ export default function DevInfoPage() {
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="text-center py-4">
+        {/* Contact - anchor: contact */}
+        <div id="contact" className="text-center py-4">
           <a href="/" className="btn-accent text-base px-8 py-3.5">
             <i className="bi bi-cup-hot text-lg"></i> নতুন স্পট যোগ করুন
           </a>

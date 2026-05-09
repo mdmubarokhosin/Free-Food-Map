@@ -896,7 +896,7 @@ body {
   color: white;
   border: 1px solid transparent;
   white-space: nowrap;
-  box-shadow: 0 2px 10px rgba(13, 148, 136, 0.25);
+  box-shadow: 0 2px 10px rgba(13, 148, 136, 0.25), 0 0 0 2px rgba(20, 184, 166, 0.3);
 }
 .filter-chip-active:hover {
   background: linear-gradient(135deg, #0F766E, #047857);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useMemo } from "react";
+import { useRef, useState, useMemo, useEffect } from "react";
 import type { Spot, SpotType } from "@/types";
 import { SPOT_TYPE_CONFIG } from "@/types";
 
@@ -28,10 +28,19 @@ function formatTimeAgo(timestamp: number): string {
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
-  if (mins < 1) return "এখনই";
+  if (mins < 1) return "এইমাত্র";
   if (mins < 60) return `${toBn(mins)} মিনিট আগে`;
   if (hours < 24) return `${toBn(hours)} ঘন্টা আগে`;
-  if (days === 1) return "গতকাল";
+
+  // Check if yesterday
+  const spotDate = new Date(timestamp);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (spotDate >= yesterday.getTime()) return "গতকাল";
+  if (days < 7) return `${toBn(days)} দিন আগে`;
   return `${toBn(days)} দিন আগে`;
 }
 
@@ -91,6 +100,16 @@ export default function BottomSheet({
   const oldSpots = useMemo(() => spots.filter((s) => isOldSpot(s.createdAt)), [spots]);
   const verifiedCount = useMemo(() => spots.filter((s) => s.verified && s.active).length, [spots]);
 
+  // ISSUE 7: Scroll to selected spot card when marker is clicked
+  useEffect(() => {
+    if (selectedSpotId) {
+      const el = document.getElementById(`spot-${selectedSpotId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [selectedSpotId]);
+
   // Filter spots by active type filter
   const filteredTodaySpots = useMemo(() => {
     if (activeFilter === "all") return todaySpots;
@@ -141,20 +160,27 @@ export default function BottomSheet({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-white">স্পট সমূহ</h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-white/15 text-white text-[10px] font-bold backdrop-blur-sm ring-1 ring-white/10">
-                  {toBn(spots.length)}
+              </div>
+              {/* ISSUE 11: Counter as visual pill badges */}
+              <div className="flex items-center gap-2 mt-1">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-[10px] font-semibold">
+                  <i className="bi bi-geo-alt text-[9px]"></i> {toBn(spots.length)}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-400/20 text-[10px] font-semibold">
+                  <i className="bi bi-fire text-[9px]"></i> {toBn(todaySpots.length)}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-400/20 text-[10px] font-semibold">
+                  <i className="bi bi-check-circle text-[9px]"></i> {toBn(verifiedCount)}
                 </span>
               </div>
-              <p className="text-[10px] text-white/70 mt-0.5">
-                সর্বমোট: {toBn(spots.length)} | নতুন: {toBn(todaySpots.length)} | নিশ্চিত: {toBn(verifiedCount)}
-              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {/* Add Spot Button */}
+            {/* ISSUE 5: Prominent CTA button (not in filter row) */}
             <button
               onClick={onAddClick}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white text-teal-800 text-xs font-bold hover:bg-white/90 active:scale-95 transition-all shadow-md ring-1 ring-white/20"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-bold hover:from-orange-600 hover:to-amber-600 active:scale-95 transition-all shadow-md ring-1 ring-white/20"
+              aria-label="নতুন স্পট যোগ করুন"
             >
               <i className="bi bi-plus-lg text-sm"></i>
               <span className="hidden sm:inline">নতুন স্পট</span>
@@ -163,6 +189,7 @@ export default function BottomSheet({
             <button
               onClick={onToggleExpand}
               className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-white active:scale-95 transition-transform ring-1 ring-white/10"
+              aria-label={expanded ? "সংকোচ করুন" : "প্রসারিত করুন"}
             >
               <i className={`bi bi-chevron-up text-sm transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}></i>
             </button>
@@ -170,11 +197,14 @@ export default function BottomSheet({
         </div>
       </div>
 
-      {/* Quick type filter chips */}
+      {/* ISSUE 9: Quick type filter chips with aria-labels */}
       <div className="flex items-center gap-2 px-4 pb-2 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveFilter("all")}
           className={activeFilter === "all" ? "filter-chip-active" : "filter-chip"}
+          role="button"
+          aria-label="সব স্পট ফিল্টার করুন"
+          aria-pressed={activeFilter === "all"}
         >
           <i className="bi bi-grid-3x3-gap-fill text-[10px]"></i> সব
         </button>
@@ -183,8 +213,11 @@ export default function BottomSheet({
             key={key}
             onClick={() => setActiveFilter(key)}
             className={activeFilter === key ? "filter-chip-active" : "filter-chip"}
+            role="button"
+            aria-label={`${val.label} ফিল্টার করুন`}
+            aria-pressed={activeFilter === key}
           >
-            <span>{val.emoji}</span> {val.label}
+            <span aria-label={val.label}>{val.emoji}</span> {val.label}
           </button>
         ))}
       </div>
@@ -319,6 +352,7 @@ function SpotCard({
 
   return (
     <div
+      id={`spot-${spot.id}`}
       onClick={onClick}
       className={`
         group relative p-3.5 rounded-2xl cursor-pointer transition-all duration-300
@@ -336,7 +370,7 @@ function SpotCard({
         <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-orange-400 via-amber-400 to-emerald-400 opacity-20 -z-10 blur-sm"></div>
       )}
 
-      {/* Top row: marker + info + actions */}
+      {/* ISSUE 3: Top row with better spacing */}
       <div className="flex items-start gap-3">
         {/* Type Marker */}
         <div className="relative shrink-0">
@@ -350,6 +384,7 @@ function SpotCard({
               background: `linear-gradient(135deg, ${config.color}15, ${config.color}25)`,
               border: spot.verified ? `2px solid ${config.color}` : "none",
             } : undefined}
+            aria-label={config.label}
           >
             {config.emoji}
           </div>
@@ -363,8 +398,9 @@ function SpotCard({
 
         {/* Info */}
         <div className="flex-1 min-w-0">
+          {/* ISSUE 3: More prominent name with text-[15px] */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            <h4 className={`text-sm font-bold truncate ${isLatest ? "text-white" : "text-foreground"}`}>
+            <h4 className={`text-[15px] font-bold truncate leading-tight ${isLatest ? "text-white" : "text-foreground"}`}>
               {spot.name}
             </h4>
             {isNew && !isLatest && (
@@ -375,12 +411,12 @@ function SpotCard({
           </div>
 
           {/* Location */}
-          <p className={`text-xs mt-0.5 truncate flex items-center gap-1 ${isLatest ? "text-white/80" : "text-muted-foreground"}`}>
+          <p className={`text-xs mt-1 truncate flex items-center gap-1 ${isLatest ? "text-white/80" : "text-muted-foreground"}`}>
             <i className="bi bi-geo-alt text-[10px] shrink-0"></i>
             <span>{spot.area || spot.address || spot.city}</span>
           </p>
 
-          {/* Type + Time row */}
+          {/* ISSUE 3: Type + Time row with better spacing */}
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             <span className={`text-[10px] font-semibold rounded-lg px-2 py-0.5 ${
               isLatest ? "bg-white/20 text-white" : "text-muted-foreground bg-secondary"
@@ -397,10 +433,10 @@ function SpotCard({
             </span>
           </div>
 
-          {/* Open/Closed Status Badge */}
-          <div className="mt-1.5">
-            <span className={`${openStatus.color} ${isLatest && openStatus.status === "open" ? "!bg-white/20 !text-white" : ""}`}>
-              {openStatus.status === "open" && <i className="bi bi-circle-fill text-[6px]"></i>}
+          {/* ISSUE 3: Open/Closed Status Badge - slightly larger with pulsing dot for "open" */}
+          <div className="mt-2">
+            <span className={`${openStatus.color} text-[11px] px-3 py-1 ${isLatest && openStatus.status === "open" ? "!bg-white/20 !text-white" : ""}`}>
+              {openStatus.status === "open" && <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-1 animate-pulse-dot" aria-hidden="true"></span>}
               {openStatus.status === "closing" && <i className="bi bi-clock text-[9px]"></i>}
               {openStatus.status === "closed" && <i className="bi bi-x-circle text-[9px]"></i>}
               {openStatus.status === "unknown" && <i className="bi bi-dash-circle text-[9px]"></i>}
@@ -409,7 +445,7 @@ function SpotCard({
           </div>
         </div>
 
-        {/* Vote buttons - vertical on mobile, horizontal on sm+ */}
+        {/* ISSUE 3: Vote buttons - only show count if > 0 */}
         <div className="flex flex-col gap-1 shrink-0">
           <button
             onClick={(e) => { e.stopPropagation(); onLike(); }}
@@ -418,9 +454,10 @@ function SpotCard({
                 ? "bg-white/20 text-white hover:bg-white/30"
                 : "bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 text-green-600 dark:text-green-400 hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30 border border-green-200/50 dark:border-green-800/50"
             }`}
+            aria-label={`পছন্দ: ${toBn(spot.positiveVotes)}`}
           >
             <i className="bi bi-hand-thumbs-up-fill text-[10px]"></i>
-            <span>{toBn(spot.positiveVotes)}</span>
+            {spot.positiveVotes > 0 && <span>{toBn(spot.positiveVotes)}</span>}
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onDislike(); }}
@@ -429,30 +466,36 @@ function SpotCard({
                 ? "bg-white/20 text-white hover:bg-white/30"
                 : "bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 text-red-500 dark:text-red-400 hover:from-red-100 hover:to-rose-100 dark:hover:from-red-900/30 dark:hover:to-rose-900/30 border border-red-200/50 dark:border-red-800/50"
             }`}
+            aria-label={`অপছন্দ: ${toBn(spot.negativeVotes)}`}
           >
             <i className="bi bi-hand-thumbs-down text-[10px]"></i>
-            <span>{toBn(spot.negativeVotes)}</span>
+            {spot.negativeVotes > 0 && <span>{toBn(spot.negativeVotes)}</span>}
           </button>
         </div>
       </div>
 
       {/* Verified banner for latest */}
       {isLatest && spot.verified && (
-        <div className="mt-2 flex items-center gap-1.5">
+        <div className="mt-2.5 flex items-center gap-1.5">
           <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
             <i className="bi bi-patch-check-fill text-yellow-300 text-[10px]"></i>
             <span className="text-[10px] font-semibold text-white">ভেরিফাইড</span>
           </div>
-          <span className="text-[10px] text-white/50">•</span>
-          <span className="text-[10px] text-white/60 flex items-center gap-0.5">
-            <i className="bi bi-eye text-[9px]"></i> {toBn(spot.viewCount || 0)}
-          </span>
+          {/* ISSUE 2: Only show view count when > 0 */}
+          {(spot.viewCount || 0) > 0 && (
+            <>
+              <span className="text-[10px] text-white/50">•</span>
+              <span className="text-[10px] text-white/60 flex items-center gap-0.5">
+                <i className="bi bi-eye text-[9px]"></i> {toBn(spot.viewCount || 0)}
+              </span>
+            </>
+          )}
         </div>
       )}
 
       {/* Bottom bar for non-latest cards */}
       {!isLatest && (
-        <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between">
+        <div className="mt-2.5 pt-2 border-t border-border/50 flex items-center justify-between">
           <div className="flex items-center gap-1.5 flex-wrap">
             {spot.verified && (
               <span className="flex items-center gap-0.5 text-[10px] font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-1.5 py-0.5 rounded-md">
@@ -464,24 +507,35 @@ function SpotCard({
                 <i className="bi bi-hourglass-split text-[9px]"></i> ভেরিফিকেশন অপেক্ষমান
               </span>
             )}
-            {(spot.viewCount || spot.directionCount) && (
+            {/* ISSUE 2: Only show view/direction counts when values > 0 */}
+            {((spot.viewCount || 0) > 0 || (spot.directionCount || 0) > 0) && (
               <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                <i className="bi bi-eye text-[9px]"></i> {toBn(spot.viewCount || 0)}
+                {(spot.viewCount || 0) > 0 && (
+                  <span className="flex items-center gap-0.5">
+                    <i className="bi bi-eye text-[9px]"></i> {toBn(spot.viewCount || 0)}
+                  </span>
+                )}
                 {(spot.viewCount || 0) > 0 && (spot.directionCount || 0) > 0 && <span className="ml-1">•</span>}
-                {(spot.directionCount || 0) > 0 && <span className="ml-1 flex items-center gap-0.5"><i className="bi bi-cursor text-[9px]"></i> {toBn(spot.directionCount)}</span>}
+                {(spot.directionCount || 0) > 0 && (
+                  <span className="ml-1 flex items-center gap-0.5">
+                    <i className="bi bi-compass text-[9px]"></i> {toBn(spot.directionCount)}
+                  </span>
+                )}
               </span>
             )}
           </div>
-          {/* Direction button */}
+          {/* ISSUE 4: Direction button with compass icon */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               window.open(`https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`, "_blank");
             }}
             title="ম্যাপে রাস্তা দেখুন"
+            aria-label="ম্যাপে রাস্তা দেখুন"
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-teal-600 text-white hover:bg-teal-700 transition-all active:scale-95 shadow-sm"
           >
-            <i className="bi bi-cursor-fill text-[9px]"></i> ডিরেকশন
+            <i className="bi bi-compass-fill text-[9px]"></i> ডিরেকশন
+            <i className="bi bi-box-arrow-up-right text-[8px] opacity-70"></i>
           </button>
         </div>
       )}

@@ -30,7 +30,7 @@ export default function Footer({ standard = false }: FooterProps) {
                 <i className="bi bi-heart text-xs"></i>
                 দান করুন
               </a>
-              <a href="/dev-info" className="text-xs text-[#78716C] hover:text-teal-600 transition-colors duration-200 flex items-center gap-1">
+              <a href="/dev-info#about" className="text-xs text-[#78716C] hover:text-teal-600 transition-colors duration-200 flex items-center gap-1">
                 <i className="bi bi-question-circle text-xs"></i>
                 আমাদের সম্পর্কে
               </a>
@@ -68,7 +68,7 @@ export default function Footer({ standard = false }: FooterProps) {
         </a>
         <div className="w-px h-3 bg-stone-300 dark:bg-stone-600" />
         <a
-          href="/dev-info"
+          href="/dev-info#about"
           className="flex items-center gap-1 text-[11px] text-[#78716C] dark:text-stone-400 hover:text-teal-600 transition-colors duration-200"
         >
           <i className="bi bi-info-circle text-xs"></i>
@@ -76,7 +76,7 @@ export default function Footer({ standard = false }: FooterProps) {
         </a>
         <div className="w-px h-3 bg-stone-300 dark:bg-stone-600" />
         <a
-          href="/dev-info"
+          href="/dev-info#how-it-works"
           className="flex items-center gap-1 text-[11px] text-[#78716C] dark:text-stone-400 hover:text-teal-600 transition-colors duration-200"
         >
           <i className="bi bi-question-circle text-xs"></i>
@@ -84,7 +84,7 @@ export default function Footer({ standard = false }: FooterProps) {
         </a>
         <div className="w-px h-3 bg-stone-300 dark:bg-stone-600" />
         <a
-          href="/dev-info"
+          href="/dev-info#contact"
           className="flex items-center gap-1 text-[11px] text-[#78716C] dark:text-stone-400 hover:text-teal-600 transition-colors duration-200"
         >
           <i className="bi bi-envelope text-xs"></i>
